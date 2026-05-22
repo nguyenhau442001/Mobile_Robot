@@ -223,3 +223,19 @@ ros2 launch mobile_robot_teleop trapezoid_profile_controller.launch.py
 
 The robot accelerates from standstill (t = 9) to 5 m/s (t = 14), then decelerates from 5 m/s (t = 14) to 0 m/s (t = 15).
 <img width="1827" height="746" alt="image" src="https://github.com/user-attachments/assets/e92fa2c7-2004-4760-afc4-ae60f8adcf35" />
+
+## Real Time Factor (Average)
+
+Run the following command while the simulation is active to measure the average RTF over 30 samples:
+
+```bash
+gz topic -e -t /world/default/stats \
+  | grep real_time_factor \
+  | head -30 \
+  | awk '{sum += $2; count++} END {print "Average RTF:", sum/count}'
+```
+
+> **Note:** Make sure Gazebo is running before executing this command.
+> A value close to `1.0` indicates the simulation is running in real time.
+> Values below `1.0` mean the simulation is slower than real time.
+
