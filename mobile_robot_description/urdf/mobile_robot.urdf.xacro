@@ -33,10 +33,10 @@
       <material name="grayish-brown"></material>
     </visual>
 
-    <!-- Chassis Collision -->
+    <!-- Chassis Collision (bbox primitive, see scripts/inspect_mesh.py) -->
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/chassis.STL"/></geometry>
+      <origin xyz="0 0 0.6782" rpy="0 0 0"/>
+      <geometry><box size="0.6146 0.5660 1.3060"/></geometry>
     </collision>
   </link>
 
@@ -106,9 +106,10 @@
       <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/left_wheel_link.STL"/></geometry>
       <material name="black"></material>
     </visual>
+    <!-- Cylinder collision along Y (axle), see scripts/inspect_mesh.py -->
     <collision>
-      <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/left_wheel_link.STL"/></geometry>
+      <origin xyz="0 -0.0205 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.0744" length="0.0410"/></geometry>
     </collision>
   </link>
 
@@ -135,9 +136,10 @@
       <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/right_wheel_link.STL"/></geometry>
       <material name="black"></material>
     </visual>
+    <!-- Cylinder collision along Y (axle), see scripts/inspect_mesh.py -->
     <collision>
-      <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/right_wheel_link.STL"/></geometry>
+      <origin xyz="0 0.0165 0" rpy="1.5708 0 0"/>
+      <geometry><cylinder radius="0.0744" length="0.0410"/></geometry>
     </collision>
   </link>
 
@@ -176,9 +178,10 @@
       <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/lidar.STL"/></geometry>
       <material name="white"></material>
     </visual>
+    <!-- Cylinder collision along Z, see scripts/inspect_mesh.py -->
     <collision>
-      <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/lidar.STL"/></geometry>
+      <origin xyz="-0.0227 0 -0.0069" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.0303" length="0.0877"/></geometry>
     </collision>
   </link>
 
