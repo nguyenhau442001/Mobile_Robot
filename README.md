@@ -20,6 +20,32 @@ sudo apt install \
   ros-jazzy-robot-localization
 ```
 
+### Python virtual environment (for `trimesh` and other pip-only deps)
+Ubuntu 24.04 is PEP 668 protected, so pip-only packages (like `trimesh`) cannot be installed into the system Python directly. We use a venv with `--system-site-packages` so ROS 2 packages (`rclpy`, etc.) remain importable from inside the venv.
+
+```bash
+# One-time: install the venv module (Ubuntu 24.04 / Python 3.12)
+sudo apt install -y python3.12-venv
+
+# Create the venv (inherits system site-packages so ROS 2 still works)
+python3 -m venv --system-site-packages ~/.venvs/robot
+
+# Install this workspace's Python deps (declared in pyproject.toml)
+~/.venvs/robot/bin/pip install -e ~/ros2_ws/src/Differential_Drive_Mobile_Robot
+```
+
+Activate it before running ROS 2 nodes that need the pip-installed deps:
+```bash
+source ~/.venvs/robot/bin/activate
+source /opt/ros/jazzy/setup.bash
+source ~/ros2_ws/install/setup.bash
+```
+
+Verify:
+```bash
+python -c "import trimesh, rclpy; print('trimesh', trimesh.__version__, '| rclpy OK')"
+```
+
 ## 2. Clone the source code from GitHub and build the packages
 ```bash
 mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src

@@ -1,0 +1,8 @@
+[project]
+name = "differential-drive-mobile-robot"
+version = "0.1.0"
+description = "Dependencies for the differential drive mobile robot workspace"
+requires-python = ">=3.10"
+dependencies = [
+    "trimesh>=4.0",
+]
