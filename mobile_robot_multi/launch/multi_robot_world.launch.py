@@ -5,7 +5,7 @@ Robots are read from a YAML list (config/robots.yaml). For each robot:
   - ros_gz_sim create to spawn the entity
   - ros_gz_bridge for cmd_vel / odom / imu / scan (namespaced topics)
   - ros_gz_bridge for joint_states (namespaced model topic -> /<ns>/joint_states)
-  - static world -> <ns>/odom TF at the spawn pose
+  - static world -> <ns>/odom TF at the spawn pose (skip when nav2 owns it)
 
 Gazebo only — no RViz. Pair with mobile_robot_multi/multi_robot_nav2.launch.py
 for visualization + navigation.
@@ -75,8 +75,12 @@ def _spawn_action(robot):
     )
 
 
-def _robot_aux_actions(robot, xacro_file):
-    """All per-robot actions except the gz spawn — RSP, bridges, static TF."""
+def _robot_aux_actions(robot, xacro_file, world_to_odom_static=True):
+    """All per-robot actions except the gz spawn — RSP, bridges, static TF.
+
+    When nav2 runs, AMCL owns map -> <name>/odom; set world_to_odom_static=False
+    so <name>/odom isn't given two parents.
+    """
     name = robot['name']
     x = str(robot.get('x', 0.0))
     y = str(robot.get('y', 0.0))
@@ -171,7 +175,10 @@ def _robot_aux_actions(robot, xacro_file):
         output='screen',
     )
 
-    return [rsp, sensor_bridge, joint_state_bridge, tf_bridge, world_to_odom]
+    actions = [rsp, sensor_bridge, joint_state_bridge, tf_bridge]
+    if world_to_odom_static:
+        actions.append(world_to_odom)
+    return actions
 
 
 def generate_launch_description():
@@ -194,6 +201,12 @@ def generate_launch_description():
     else:
         robots_file = os.environ.get('ROBOTS_FILE', default_robots_file)
         robots = _load_robots(robots_file)
+
+    # Set WORLD_TO_ODOM_STATIC=false when nav2 will own map -> <name>/odom,
+    # otherwise the static here gives <name>/odom two parents.
+    world_to_odom_static = (
+        os.environ.get('WORLD_TO_ODOM_STATIC', 'true').lower() != 'false'
+    )
 
     robots_file_arg = DeclareLaunchArgument(
         'robots_file',
@@ -227,7 +240,7 @@ def generate_launch_description():
     # idempotent against late Gazebo topics and the latched URDFs need to be
     # on the network before any spawn subscribes.
     for r in robots:
-        actions.extend(_robot_aux_actions(r, xacro_file))
+        actions.extend(_robot_aux_actions(r, xacro_file, world_to_odom_static))
 
     # Chain `ros_gz_sim create` calls: each spawn fires only after the previous
     # one's process exits. Gazebo's /world/default/create service is
