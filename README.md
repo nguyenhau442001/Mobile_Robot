@@ -2,7 +2,9 @@
 Build a simulation for a mobile robot using **Gazebo Sim (Harmonic)** and **ROS 2 Jazzy**.
 - **mobile_robot_description** → Robot geometry and physical description (URDF/xacro).
 - **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo and bridging topics.
-- **mobile_robot_navigation2** → Nav2 launch and configuration (AMCL, DWB controller, NavFn planner).
+- **mobile_robot_slam** → slam_toolbox bring-up (online async) + RViz for mapping.
+- **mobile_robot_navigation2** → Nav2 bring-up against a saved map (AMCL, DWB controller, NavFn planner).
+- **mobile_robot_multi** → Multi-robot Gazebo + Nav2 bring-up (N robots in one world).
 - **mobile_robot_teleop** → Python nodes for teleoperation (keyboard control, trapezoidal velocity controller).
 
 
@@ -79,7 +81,7 @@ evince frames.pdf
 
 
 ## 4. SLAM
-SLAM uses **slam_toolbox** (the standard 2D-lidar SLAM stack on ROS 2). Every new shell needs the workspace sourced:
+SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal. Every new shell needs the workspace sourced:
 ```bash
 cd ~/ros2_ws
 source /opt/ros/jazzy/setup.bash
@@ -87,21 +89,20 @@ source install/setup.bash
 ```
 
 ```bash
-# First terminal: launch the mobile robot in Gazebo (10x10 world by default)
+# Terminal 1 — launch the mobile robot in Gazebo (10x10 world by default)
 ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 ```
 <img width="1842" height="787" alt="image" src="https://github.com/user-attachments/assets/73d45c8f-ca78-4eba-aee3-7f56daa7a36d" />
 
-
 ```bash
-# Second terminal: launch slam_toolbox to start building the map
-ros2 launch slam_toolbox online_async_launch.py use_sim_time:=true
+# Terminal 2 — launch slam_toolbox (online async) + RViz
+ros2 launch mobile_robot_slam mobile_robot_slam_box.launch.py
 ```
 
 <img width="1842" height="787" alt="image" src="https://github.com/user-attachments/assets/9b732f06-5fa5-4dbb-bd24-c7150c04f626" />
 
 ```bash
-# Third terminal: drive the robot with the keyboard to scan the environment
+# Terminal 3 — drive the robot with the keyboard to scan the environment
 ros2 run mobile_robot_teleop mobile_robot_teleop_key --ros-args -r cmd_vel:=/cmd_vel
 
 Control Your Differential-Drive Mobile Robot!!!
@@ -119,28 +120,40 @@ space key, s : force stop
 CTRL-C to quit
 ```
 
-Fourth terminal: save the map (creates `map.yaml` and `map.pgm`)
 ```bash
+# Terminal 4 — save the map (creates map.yaml + map.pgm under mobile_robot_navigation2/map/)
 ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/Differential_Drive_Mobile_Robot/mobile_robot_navigation2/map/map
 ```
 
+> The slam_toolbox params used here live in [mobile_robot_slam/param/slam_toolbox.yaml](mobile_robot_slam/param/slam_toolbox.yaml) (frames set to `chassis`/`odom`/`map`, scan topic `/scan`, sim time on). Override with `slam_params_file:=<path>` or `use_sim_time:=false` if needed.
+
 ## 5. Navigation (Nav2 with DWB controller and NavFn planner)
-Every new shell needs the workspace sourced:
+Nav2 runs against the saved map produced in section 4 — no slam_toolbox needed at navigation time. Every new shell needs the workspace sourced:
 ```bash
 cd ~/ros2_ws
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
 ```
 
+### Single robot
 ```bash
-# First terminal: launch the mobile robot in Gazebo (10x10 world by default)
+# Terminal 1 — Gazebo world + robot
 ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
+
+# Terminal 2 — Nav2 (map_server + AMCL + planner + controller) + RViz
+ros2 launch mobile_robot_navigation2 single_robot_nav2.launch.py use_sim_time:=true
 ```
 
+### N robots
+Replace `<n>` with the number of robots (e.g. `N_ROBOTS=3`). Both launches read the same `N_ROBOTS` env var and lay the robots out on a centered square grid.
 ```bash
-# Second terminal: launch Nav2 with the saved map
-ros2 launch mobile_robot_navigation2 single_robot_nav2.launch.py # Single robot
+# Terminal 1 — spawn N robots into the shared Gazebo world
+N_ROBOTS=<n> ros2 launch mobile_robot_multi multi_robot_world.launch.py
+
+# Terminal 2 — bring up Nav2 in each robot's namespace + multi-robot RViz
+N_ROBOTS=<n> ros2 launch mobile_robot_multi multi_robot_nav2.launch.py
 ```
+Each robot's stack runs under `/<robot>/...` with frames `<robot>/chassis`, `<robot>/odom`, etc. The `map` frame is shared. RViz's Goal/InitialPose tools target the **first** robot by default — for multi-robot goal dispatch, use a `nav2_simple_commander` script per namespace.
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/21b207db-d197-46dd-814f-11dad260dea4" />
 
 In RViz, click **2D Pose Estimate** and set the initial pose of the robot.
