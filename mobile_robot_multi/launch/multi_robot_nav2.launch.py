@@ -13,6 +13,7 @@ inside the namespace with no /tf remap.
 """
 
 import colorsys
+import glob
 import math
 import os
 import re
@@ -121,9 +122,30 @@ def _rewrite_tree(node, ns, map_yaml_path):
     return node
 
 
-def _generate_params(robot, ns, src_params, map_yaml_path, out_path):
-    with open(src_params, 'r') as f:
-        params = yaml.safe_load(f)
+def _load_param_dir(param_dir):
+    """Merge every *_params.yaml in `param_dir` into one dict.
+
+    Collide-check on duplicate top-level keys so a typo fails loudly.
+    """
+    files = sorted(glob.glob(os.path.join(param_dir, '*_params.yaml')))
+    # Skip broken symlinks — colcon --symlink-install leaves stale symlinks
+    # in install/ when source files are renamed.
+    files = [f for f in files if os.path.isfile(f)]
+    if not files:
+        raise RuntimeError(f'No *_params.yaml files in {param_dir}')
+    combined = {}
+    for f in files:
+        with open(f) as fp:
+            data = yaml.safe_load(fp) or {}
+        for k, v in data.items():
+            if k in combined:
+                raise RuntimeError(f'Duplicate top-level key {k!r} in {f}')
+            combined[k] = v
+    return combined
+
+
+def _generate_params(robot, ns, src_params_dir, map_yaml_path, out_path):
+    params = _load_param_dir(src_params_dir)
 
     params = _rewrite_tree(params, ns, map_yaml_path)
 
@@ -415,11 +437,11 @@ NAV2_NODES = [
 ]
 
 
-def _robot_nav2_actions(robot, src_params, map_yaml):
+def _robot_nav2_actions(robot, src_params_dir, map_yaml):
     """Per-robot: params yaml + all nav2 nodes + 2 lifecycle managers."""
     ns = robot['name']
     params_out = f'/tmp/{ns}_nav2.yaml'
-    _generate_params(robot, ns, src_params, map_yaml, params_out)
+    _generate_params(robot, ns, src_params_dir, map_yaml, params_out)
     print(f'[multi_robot_nav2] {ns} pose: '
           f'x={robot["x"]} y={robot["y"]} yaw={robot["yaw"]}  '
           f'params={params_out}')
@@ -477,22 +499,26 @@ def generate_launch_description():
     pkg_nav = get_package_share_directory('mobile_robot_navigation2')
 
     default_robots_file = os.path.join(pkg_multi, 'config', 'robots.yaml')
-    default_src_params = os.path.join(pkg_nav, 'param', 'mobile_robot.yaml')
+    default_src_params_dir = os.path.join(pkg_nav, 'param')
     default_map = os.path.join(pkg_nav, 'map', 'map.yaml')
 
     rviz_arg = DeclareLaunchArgument(
         'rviz', default_value='true')
 
     # Resolve at parse time so we can pre-generate per-robot yaml + RViz config.
+    # NAV2_PARAMS now points to a directory of *_params.yaml files (was a
+    # single mobile_robot.yaml file); merged in-memory before per-namespace
+    # rewriting.
     robots_file = os.environ.get('ROBOTS_FILE', default_robots_file)
-    src_params = os.environ.get('NAV2_PARAMS', default_src_params)
+    src_params_dir = os.environ.get('NAV2_PARAMS', default_src_params_dir)
     map_yaml = os.environ.get('NAV2_MAP', default_map)
     robots = _resolve_robots(robots_file)
-    print(f'[multi_robot_nav2] bringing up {len(robots)} robots')
+    print(f'[multi_robot_nav2] bringing up {len(robots)} robots '
+          f'using params from {src_params_dir}')
 
     nav_actions = []
     for r in robots:
-        nav_actions.extend(_robot_nav2_actions(r, src_params, map_yaml))
+        nav_actions.extend(_robot_nav2_actions(r, src_params_dir, map_yaml))
 
     # Shared map. AMCL publishes map -> <ns>/odom per robot; the world -> map
     # static anchors the map frame so the multi_robot_world `world` frame still

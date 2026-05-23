@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
 import os
 
+import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -23,29 +25,56 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
+def _merge_param_files(param_dir):
+    """Merge every *_params.yaml in `param_dir` into one /tmp YAML.
+
+    Each split file owns disjoint top-level node keys (amcl, bt_navigator, ...).
+    We collide-check on merge so a typo or duplicate node block fails loudly
+    instead of silently shadowing.
+    """
+    files = sorted(glob.glob(os.path.join(param_dir, '*_params.yaml')))
+    # Skip broken symlinks — colcon --symlink-install leaves stale symlinks
+    # in install/ when source files are renamed.
+    files = [f for f in files if os.path.isfile(f)]
+    if not files:
+        raise RuntimeError(f'No *_params.yaml files in {param_dir}')
+
+    combined = {}
+    for f in files:
+        with open(f) as fp:
+            data = yaml.safe_load(fp) or {}
+        for k, v in data.items():
+            if k in combined:
+                raise RuntimeError(f'Duplicate top-level key {k!r} in {f}')
+            combined[k] = v
+
+    out = '/tmp/mobile_robot_nav2_combined.yaml'
+    with open(out, 'w') as fp:
+        yaml.safe_dump(combined, fp, sort_keys=False)
+    print(f'[single_robot_nav2] merged {len(files)} param files -> {out}')
+    for f in files:
+        print(f'  - {os.path.basename(f)}')
+    return out
+
+
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+
+    pkg_share = get_package_share_directory('mobile_robot_navigation2')
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(
-            get_package_share_directory('mobile_robot_navigation2'),
-            'map',
-            'map.yaml'))
+        default=os.path.join(pkg_share, 'map', 'map.yaml'))
 
-    param_dir = LaunchConfiguration(
-        'params_file',
-        default=os.path.join(
-            get_package_share_directory('mobile_robot_navigation2'),
-            'param',
-            'mobile_robot.yaml'))
+    # Build the combined params YAML at parse time so nav2_bringup gets a
+    # single file (its API expects one path, not a directory).
+    combined_params = _merge_param_files(os.path.join(pkg_share, 'param'))
+    param_dir = LaunchConfiguration('params_file', default=combined_params)
 
     nav2_launch_file_dir = os.path.join(
         get_package_share_directory('nav2_bringup'), 'launch')
 
     rviz_config_dir = os.path.join(
-        get_package_share_directory('mobile_robot_navigation2'),
-        'rviz',
-        'mobile_robot_navigation2.rviz')
+        pkg_share, 'rviz', 'mobile_robot_navigation2.rviz')
 
     return LaunchDescription([
         DeclareLaunchArgument(
