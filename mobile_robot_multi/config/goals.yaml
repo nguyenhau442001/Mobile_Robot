@@ -1,0 +1,18 @@
+# Hardcoded Nav2 goals for testing multi-robot navigation.
+#
+# Each entry maps a robot namespace to a target pose in the (shared) `map`
+# frame. dispatch_goals.py sends them all simultaneously to
+# /<robot>/navigate_to_pose so you can watch the planners + costmaps
+# negotiate when multiple robots are in motion at once.
+#
+# yaw is in radians (0 = facing +X).
+
+goals:
+  - robot: robot1
+    x: 2.0
+    y: 2.0
+    yaw: 0.0
+  - robot: robot2
+    x: -2.0
+    y: -2.0
+    yaw: 3.14159
