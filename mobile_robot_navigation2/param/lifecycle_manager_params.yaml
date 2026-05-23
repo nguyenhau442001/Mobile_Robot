@@ -1,0 +1,17 @@
+lifecycle_manager_localization:
+  ros__parameters:
+    autostart: true
+    node_names: ["map_server", "amcl"]
+    bond_timeout: 20.0
+    attempt_respawn_reconnection: true
+    bond_respawn_max_duration: 10.0
+
+lifecycle_manager_navigation:
+  ros__parameters:
+    autostart: true
+    bond_timeout: 20.0
+    attempt_respawn_reconnection: true
+    bond_respawn_max_duration: 10.0
+    node_names: ["controller_server", "smoother_server", "planner_server",
+                 "behavior_server", "velocity_smoother", "collision_monitor",
+                 "bt_navigator", "waypoint_follower", "docking_server"]
