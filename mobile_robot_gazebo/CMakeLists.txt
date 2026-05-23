@@ -24,4 +24,10 @@ install(DIRECTORY launch worlds
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(
+  PROGRAMS 
+    scripts/physic_engines_rtf_measure.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

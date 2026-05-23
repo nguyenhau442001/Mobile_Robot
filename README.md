@@ -237,9 +237,30 @@ ros2 launch mobile_robot_teleop trapezoid_profile_controller.launch.py
 The robot accelerates from standstill (t = 9) to 5 m/s (t = 14), then decelerates from 5 m/s (t = 14) to 0 m/s (t = 15).
 <img width="1827" height="746" alt="image" src="https://github.com/user-attachments/assets/e92fa2c7-2004-4760-afc4-ae60f8adcf35" />
 
-## Real Time Factor (Average)
+## 7. Real-Time Factor (RTF)
 
-Run the following command while the simulation is active to measure the average RTF over 30 samples:
+The **Real-Time Factor** is the ratio between simulated time and wall-clock time. RTF = 1.0 means the simulation advances at real speed; RTF < 1.0 means the physics step is too expensive for the host to keep up, and RTF > 1.0 means it is running faster than real time. Tracking RTF is the standard way to compare the cost of different physics engines (ODE, TPE, Bullet, DART) or to detect when world complexity has outgrown the host.
+
+The world stats are published on `/world/<world_name>/stats` (`gz.msgs.WorldStatistics`). Two ways to read them, depending on whether you want a quick spot check or a reproducible measurement.
+
+### 7.1 Quick check — `gz topic` one-liner
+
+Single-shot inspection of the latest stats message:
+
+```bash
+gz topic --echo --topic /world/default/stats -n 1
+```
+
+Example output (only the relevant fields shown):
+```
+sim_time          { sec: 287  nsec: 897000000 }
+real_time         { sec: 351  nsec: 671898917 }
+iterations:       287897
+real_time_factor: 1.01432737416001
+step_size         { nsec: 1000000 }
+```
+
+Rolling average over the next 30 samples:
 
 ```bash
 gz topic -e -t /world/default/stats \
@@ -248,7 +269,27 @@ gz topic -e -t /world/default/stats \
   | awk '{sum += $2; count++} END {print "Average RTF:", sum/count}'
 ```
 
-> **Note:** Make sure Gazebo is running before executing this command.
-> A value close to `1.0` indicates the simulation is running in real time.
-> Values below `1.0` mean the simulation is slower than real time.
+### 7.2 Reproducible benchmark — `physic_engines_rtf_measure.py`
 
+For comparing physics engines or capturing the variance (not just the mean), use the bundled benchmark script. It subscribes to the stats topic for a fixed duration and reports mean, median, stdev, min, and max:
+
+```bash
+ros2 run mobile_robot_gazebo physic_engines_rtf_measure.py --duration 60 --world default
+```
+
+Example output:
+```
+Collecting RTF samples for 60s on /world/default/stats...
+
+=== RTF Benchmark Results ===
+  Samples     : 50
+  Mean RTF    : 0.9062
+  Median RTF  : 0.9997
+  Stdev RTF   : 0.2657
+  Min RTF     : 0.1304
+  Max RTF     : 1.6060
+```
+
+**How to read the numbers.** A large gap between **mean** and **median** (here 0.91 vs 1.00) signals occasional stalls dragging the average down — the simulation is mostly real-time but loses ground during bursts of work (model spawns, sensor updates, contact spikes). A high **stdev** confirms that variance, and the **min/max** bracket the worst and best step the host produced over the window.
+
+**Workflow for comparing physics engines.** Swap the engine in the SDF (`<physics name="..." type="ode|tpe|bullet|dart">`), restart Gazebo, run the script against the same world and duration, and compare medians (more robust than means under jitter).
