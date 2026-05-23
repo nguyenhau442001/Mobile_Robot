@@ -54,6 +54,54 @@ def _resolve_robot(robot_name, robots_file):
     raise RuntimeError(f'{robot_name!r} not found in {robots_file}')
 
 
+PREFIXED_FRAMES = {'chassis', 'odom', 'imu_link', 'lidar_link', 'base_link'}
+
+# Keys whose value names a TF frame that should be prefixed with <ns>/.
+FRAME_KEYS = {
+    'base_frame_id', 'odom_frame_id', 'global_frame_id',
+    'robot_base_frame', 'global_frame', 'local_frame',
+    'base_frame', 'fixed_frame',
+    'frame_id', 'child_frame_id',
+}
+
+# Keys whose value names a topic that, if absolute, should be made relative
+# so the node's namespace picks it up.
+TOPIC_KEYS = {'topic', 'scan_topic', 'map_topic', 'odom_topic',
+              'cmd_vel_in_topic', 'cmd_vel_out_topic', 'state_topic'}
+
+
+def _rewrite_value(key, value, ns, map_yaml_path):
+    if key == 'yaml_filename' and isinstance(value, str):
+        # map_server expects an absolute path
+        return map_yaml_path
+    if key in FRAME_KEYS and isinstance(value, str) and value in PREFIXED_FRAMES:
+        return f'{ns}/{value}'
+    if key in TOPIC_KEYS and isinstance(value, str) and value.startswith('/'):
+        # Strip the leading slash so the namespace pushes it.
+        return value.lstrip('/')
+    return value
+
+
+def _rewrite_tree(node, ns, map_yaml_path):
+    if isinstance(node, dict):
+        return {
+            k: _rewrite_tree(_rewrite_value(k, v, ns, map_yaml_path), ns, map_yaml_path)
+            for k, v in node.items()
+        }
+    if isinstance(node, list):
+        return [_rewrite_tree(v, ns, map_yaml_path) for v in node]
+    return node
+
+
+def _generate_params(ns, src_params, map_yaml_path, out_path):
+    with open(src_params, 'r') as f:
+        params = yaml.safe_load(f)
+    params = _rewrite_tree(params, ns, map_yaml_path)
+    with open(out_path, 'w') as f:
+        yaml.safe_dump(params, f, sort_keys=False)
+    return out_path
+
+
 # Lifecycle nodes the lifecycle_manager will start. Order matters for the
 # navigation manager (controller before bt_navigator, etc.).
 LOCALIZATION_NODES = ['map_server', 'amcl']
@@ -91,18 +139,24 @@ def generate_launch_description():
 
     default_robots_file = os.path.join(pkg_multi, 'config', 'robots.yaml')
     default_src_params = os.path.join(pkg_nav, 'param', 'mobile_robot.yaml')
+    default_map = os.path.join(pkg_nav, 'map', 'map.yaml')
 
     # Resolve at parse time. Override via env vars (same pattern as the world
     # launch so the two stay in lockstep).
     robot_name = os.environ.get('NAV2_ROBOT', 'robot1')
     robots_file = os.environ.get('ROBOTS_FILE', default_robots_file)
     src_params = os.environ.get('NAV2_PARAMS', default_src_params)
+    map_yaml = os.environ.get('NAV2_MAP', default_map)
 
     robot = _resolve_robot(robot_name, robots_file)
     print(f'[multi_robot_nav2] {robot_name} pose: '
           f'x={robot["x"]} y={robot["y"]} yaw={robot["yaw"]}')
 
-    common_params = [src_params, {'use_sim_time': True}]
+    params_out = f'/tmp/{robot_name}_nav2.yaml'
+    _generate_params(robot_name, src_params, map_yaml, params_out)
+    print(f'[multi_robot_nav2] generated params: {params_out}')
+
+    common_params = [params_out, {'use_sim_time': True}]
 
     nav_nodes = [
         Node(
