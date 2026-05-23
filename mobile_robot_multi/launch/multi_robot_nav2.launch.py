@@ -111,8 +111,13 @@ def _generate_params(ns, src_params, map_yaml_path, out_path):
     with open(src_params, 'r') as f:
         params = yaml.safe_load(f)
     params = _rewrite_tree(params, ns, map_yaml_path)
+
+    # Re-root under the namespace so /<ns>/<node> finds its params. Same trick
+    # nav2_bringup's RewrittenYaml(root_key=ns) uses.
+    wrapped = {ns: params}
+
     with open(out_path, 'w') as f:
-        yaml.safe_dump(params, f, sort_keys=False)
+        yaml.safe_dump(wrapped, f, sort_keys=False)
     return out_path
 
 
