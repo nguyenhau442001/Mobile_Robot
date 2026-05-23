@@ -15,6 +15,7 @@ namespace re-root, initial pose seeding, RViz, and the multi-robot loop.
 
 import math
 import os
+import re
 
 import yaml
 from ament_index_python.packages import get_package_share_directory
@@ -54,6 +55,18 @@ def _resolve_robot(robot_name, robots_file):
     raise RuntimeError(f'{robot_name!r} not found in {robots_file}')
 
 
+_FIND_PKG_SHARE_RE = re.compile(r'\$\(find-pkg-share\s+([\w_-]+)\)')
+
+
+def _expand_substitutions(value):
+    """Resolve $(find-pkg-share <pkg>) ourselves — yaml.safe_load doesn't."""
+    if not isinstance(value, str):
+        return value
+    return _FIND_PKG_SHARE_RE.sub(
+        lambda m: get_package_share_directory(m.group(1)), value
+    )
+
+
 PREFIXED_FRAMES = {'chassis', 'odom', 'imu_link', 'lidar_link', 'base_link'}
 
 # Keys whose value names a TF frame that should be prefixed with <ns>/.
@@ -71,6 +84,7 @@ TOPIC_KEYS = {'topic', 'scan_topic', 'map_topic', 'odom_topic',
 
 
 def _rewrite_value(key, value, ns, map_yaml_path):
+    value = _expand_substitutions(value)
     if key == 'yaml_filename' and isinstance(value, str):
         # map_server expects an absolute path
         return map_yaml_path
