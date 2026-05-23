@@ -64,7 +64,7 @@ source install/setup.bash
   - 4 Caster links (non-driven support wheels)
   - Left & Right drive wheels
   - IMU sensor
-  - Lidar sensor (360°, 1440 samples, 10 m range)
+  - Lidar sensor (180° forward Field of View, 181 samples at 1° resolution, 5 m range, 5 Hz)
 
 <img width="1824" height="759" alt="image" src="https://github.com/user-attachments/assets/f2a69b68-876a-4dc6-a20b-09cbea5dca7f" />
 <img width="1824" height="759" alt="image" src="https://github.com/user-attachments/assets/bc2bd408-ba4a-40ff-aa22-a653fca2b56f" />
