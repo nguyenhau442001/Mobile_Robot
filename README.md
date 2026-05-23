@@ -139,7 +139,7 @@ ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 
 ```bash
 # Second terminal: launch Nav2 with the saved map
-ros2 launch mobile_robot_navigation2 navigation2.launch.py
+ros2 launch mobile_robot_navigation2 single_robot_nav2.launch.py # Single robot
 ```
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/21b207db-d197-46dd-814f-11dad260dea4" />
 
