@@ -33,9 +33,10 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
 
-  <!-- dispatch_goals.py -->
+  <!-- dispatch_goals.py + fleet_supervisor.py -->
   <exec_depend>rclpy</exec_depend>
   <exec_depend>nav2_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>action_msgs</exec_depend>
   <exec_depend>ament_index_python</exec_depend>

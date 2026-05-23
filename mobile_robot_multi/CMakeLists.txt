@@ -9,7 +9,9 @@ install(
 )
 
 install(
-  PROGRAMS scripts/dispatch_goals.py
+  PROGRAMS
+    scripts/dispatch_goals.py
+    scripts/fleet_supervisor.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
