@@ -107,10 +107,20 @@ def _rewrite_tree(node, ns, map_yaml_path):
     return node
 
 
-def _generate_params(ns, src_params, map_yaml_path, out_path):
+def _generate_params(robot, ns, src_params, map_yaml_path, out_path):
     with open(src_params, 'r') as f:
         params = yaml.safe_load(f)
     params = _rewrite_tree(params, ns, map_yaml_path)
+
+    # AMCL: seed initial pose from the spawn pose so it converges immediately.
+    amcl = params.get('amcl', {}).setdefault('ros__parameters', {})
+    amcl['set_initial_pose'] = True
+    amcl['initial_pose'] = {
+        'x': float(robot.get('x', 0.0)),
+        'y': float(robot.get('y', 0.0)),
+        'z': float(robot.get('z', 0.0)),
+        'yaw': float(robot.get('yaw', 0.0)),
+    }
 
     # Re-root under the namespace so /<ns>/<node> finds its params. Same trick
     # nav2_bringup's RewrittenYaml(root_key=ns) uses.
@@ -172,7 +182,7 @@ def generate_launch_description():
           f'x={robot["x"]} y={robot["y"]} yaw={robot["yaw"]}')
 
     params_out = f'/tmp/{robot_name}_nav2.yaml'
-    _generate_params(robot_name, src_params, map_yaml, params_out)
+    _generate_params(robot, robot_name, src_params, map_yaml, params_out)
     print(f'[multi_robot_nav2] generated params: {params_out}')
 
     common_params = [params_out, {'use_sim_time': True}]
