@@ -30,7 +30,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/chassis_link.stl"/></geometry>
-      <material name="grayish-brown"></material>
+      <material name="orange"></material>
     </visual>
 
     <!-- Chassis Collision (bbox primitive, see scripts/inspect_mesh.py) -->
