@@ -1,7 +1,7 @@
 # Project Description:
 Build a simulation for a mobile robot using **Gazebo Sim (Harmonic)** and **ROS 2 Jazzy**.
 - **mobile_robot_description** → Robot geometry and physical description (URDF/xacro).
-- **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo and bridging topics.
+- **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo (10x10 and AWS small-warehouse worlds) and bridging topics.
 - **mobile_robot_slam** → slam_toolbox bring-up (online async) + RViz for mapping.
 - **mobile_robot_navigation2** → Nav2 bring-up against a saved map (AMCL, DWB controller, NavFn planner).
 - **mobile_robot_multi** → Multi-robot Gazebo + Nav2 bring-up (N robots in one world).
@@ -121,11 +121,26 @@ CTRL-C to quit
 ```
 
 ```bash
-# Terminal 4 — save the map (creates map.yaml + map.pgm under mobile_robot_navigation2/map/)
-ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/Differential_Drive_Mobile_Robot/mobile_robot_navigation2/map/map
+# Terminal 4 — save the map (writes map.yaml + map.pgm into mobile_robot_navigation2/maps/10x10/)
+ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/Differential_Drive_Mobile_Robot/mobile_robot_navigation2/maps/10x10/map
 ```
 
 > The slam_toolbox params used here live in [mobile_robot_slam/param/slam_toolbox.yaml](mobile_robot_slam/param/slam_toolbox.yaml) (frames set to `chassis`/`odom`/`map`, scan topic `/scan`, sim time on). Override with `slam_params_file:=<path>` or `use_sim_time:=false` if needed.
+
+### Other Gazebo worlds
+The `mobile_robot_gazebo` package also ships the AWS RoboMaker small-warehouse scene:
+```bash
+ros2 launch mobile_robot_gazebo small_warehouse.launch.py            # walls + ceiling
+ros2 launch mobile_robot_gazebo no_roof_small_warehouse.launch.py    # open-top variant
+```
+Pick a clear spawn pose (avoiding shelves/clutter) with the bundled helper:
+```bash
+ros2 run mobile_robot_gazebo find_safe_spawn.py \
+  $(ros2 pkg prefix mobile_robot_gazebo)/share/mobile_robot_gazebo/worlds/no_roof_small_warehouse/no_roof_small_warehouse.world
+# then pass the suggested coords:
+ros2 launch mobile_robot_gazebo no_roof_small_warehouse.launch.py x_pos:=1.5 y_pos:=-2.5
+```
+Map the new world by running slam_toolbox the same way as above, then save under `mobile_robot_navigation2/maps/<name>/` so Nav2 can load it via `map_name:=<name>`.
 
 ## 5. Navigation (Nav2 with DWB controller and NavFn planner)
 Nav2 runs against the saved map produced in section 4 — no slam_toolbox needed at navigation time. Every new shell needs the workspace sourced:
@@ -144,6 +159,12 @@ ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 ros2 launch mobile_robot_navigation2 single_robot_nav2.launch.py use_sim_time:=true
 ```
 
+> **Picking a map.** Maps live at `mobile_robot_navigation2/maps/<name>/{map.yaml,map.pgm}`. The default is `10x10`. To use another, drop the directory and pass `map_name:=<name>`:
+> ```bash
+> ros2 launch mobile_robot_navigation2 single_robot_nav2.launch.py use_sim_time:=true map_name:=<name>
+> ```
+> An absolute path still overrides everything: `map:=/abs/path/map.yaml`.
+
 ### N robots
 Replace `<n>` with the number of robots (e.g. `N_ROBOTS=3`). Both launches read the same `N_ROBOTS` env var and lay the robots out on a centered square grid.
 ```bash
@@ -152,6 +173,9 @@ N_ROBOTS=<n> ros2 launch mobile_robot_multi multi_robot_world.launch.py
 
 # Terminal 2 — bring up Nav2 in each robot's namespace + multi-robot RViz
 N_ROBOTS=<n> ros2 launch mobile_robot_multi multi_robot_nav2.launch.py
+
+# Pick a different map subdirectory:
+NAV2_MAP_NAME=<name> N_ROBOTS=<n> ros2 launch mobile_robot_multi multi_robot_nav2.launch.py
 ```
 Each robot's stack runs under `/<robot>/...` with frames `<robot>/chassis`, `<robot>/odom`, etc. The `map` frame is shared. RViz's Goal/InitialPose tools target the **first** robot by default — for multi-robot goal dispatch, use a `nav2_simple_commander` script per namespace.
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/21b207db-d197-46dd-814f-11dad260dea4" />
@@ -169,7 +193,7 @@ cd ~/ros2_ws
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
 ros2 run rqt_plot rqt_plot
-ros2 launch mobile_robot_gazebo mobile_robot_empty_world.launch.py
+ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 ros2 run mobile_robot_teleop mobile_robot_teleop_key --ros-args -r cmd_vel:=/cmd_vel
 ```
 
@@ -230,7 +254,7 @@ The `trapezoid_cmd_vel_node` was created to send the desired velocity to the rob
 cd ~/ros2_ws
 source /opt/ros/jazzy/setup.bash
 source install/setup.bash
-ros2 launch mobile_robot_gazebo mobile_robot_empty_world.launch.py
+ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 ros2 launch mobile_robot_teleop trapezoid_profile_controller.launch.py
 ```
 

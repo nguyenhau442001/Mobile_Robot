@@ -500,7 +500,8 @@ def generate_launch_description():
 
     default_robots_file = os.path.join(pkg_multi, 'config', 'robots.yaml')
     default_src_params_dir = os.path.join(pkg_nav, 'param')
-    default_map = os.path.join(pkg_nav, 'map', 'map.yaml')
+    default_map_name = os.environ.get('NAV2_MAP_NAME', '10x10')
+    default_map = os.path.join(pkg_nav, 'maps', default_map_name, 'map.yaml')
 
     rviz_arg = DeclareLaunchArgument(
         'rviz', default_value='true')

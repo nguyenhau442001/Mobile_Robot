@@ -21,7 +21,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 
 
@@ -61,9 +61,10 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
 
     pkg_share = get_package_share_directory('mobile_robot_navigation2')
+    map_name = LaunchConfiguration('map_name', default='10x10')
     map_dir = LaunchConfiguration(
         'map',
-        default=os.path.join(pkg_share, 'map', 'map.yaml'))
+        default=PathJoinSubstitution([pkg_share, 'maps', map_name, 'map.yaml']))
 
     # Build the combined params YAML at parse time so nav2_bringup gets a
     # single file (its API expects one path, not a directory).
@@ -77,6 +78,11 @@ def generate_launch_description():
         pkg_share, 'rviz', 'mobile_robot_navigation2.rviz')
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'map_name',
+            default_value='10x10',
+            description='Map subdirectory under maps/ (overridden by map:=)'),
+
         DeclareLaunchArgument(
             'map',
             default_value=map_dir,
