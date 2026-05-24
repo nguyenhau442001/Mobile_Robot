@@ -29,7 +29,7 @@
     <!-- Chassis Visual -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/chassis_link.STL"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/chassis_link.stl"/></geometry>
       <material name="grayish-brown"></material>
     </visual>
 
@@ -103,7 +103,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/left_wheel_link.STL"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/wheel_link.stl"/></geometry>
       <material name="black"></material>
     </visual>
     <!-- Cylinder collision along Y (axle), see scripts/inspect_mesh.py -->
@@ -133,7 +133,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/right_wheel_link.STL"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/wheel_link.stl"/></geometry>
       <material name="black"></material>
     </visual>
     <!-- Cylinder collision along Y (axle), see scripts/inspect_mesh.py -->
@@ -175,7 +175,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/lidar_link.STL"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/lidar_link.stl"/></geometry>
       <material name="white"></material>
     </visual>
     <!-- Cylinder collision along Z, see scripts/inspect_mesh.py -->
