@@ -27,6 +27,7 @@ install(DIRECTORY launch worlds models
 install(
   PROGRAMS
     scripts/physic_engines_rtf_measure.py
+    scripts/find_safe_spawn.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
