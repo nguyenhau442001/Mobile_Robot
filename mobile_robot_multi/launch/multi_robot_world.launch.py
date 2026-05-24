@@ -187,7 +187,7 @@ def generate_launch_description():
     pkg_description = get_package_share_directory('mobile_robot_description')
 
     default_robots_file = os.path.join(pkg_multi, 'config', 'robots.yaml')
-    default_world = os.path.join(pkg_gazebo, 'worlds', '10x10', '10x10.world')
+    default_world = os.path.join(pkg_gazebo, 'worlds', '10x10', '10x10.sdf')
     xacro_file = os.path.join(pkg_description, 'urdf', 'mobile_robot.urdf.xacro')
 
     # Resolve robot list at parse time so we can loop in Python. If N_ROBOTS is
