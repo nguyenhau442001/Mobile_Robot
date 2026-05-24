@@ -21,7 +21,7 @@ def generate_launch_description():
     pkg_gazebo = get_package_share_directory('mobile_robot_gazebo')
     pkg_description = get_package_share_directory('mobile_robot_description')
 
-    world_file = os.path.join(pkg_gazebo, 'worlds', '10x10.world')
+    world_file = os.path.join(pkg_gazebo, 'worlds', '10x10', '10x10.world')
     xacro_file = os.path.join(pkg_description, 'urdf', 'mobile_robot.urdf.xacro')
 
     robot_description = ParameterValue(
