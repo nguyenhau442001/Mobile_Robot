@@ -20,12 +20,12 @@ find_package(ros_gz REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 # Install resources
-install(DIRECTORY launch worlds
+install(DIRECTORY launch worlds models
   DESTINATION share/${PROJECT_NAME}
 )
 
 install(
-  PROGRAMS 
+  PROGRAMS
     scripts/physic_engines_rtf_measure.py
   DESTINATION lib/${PROJECT_NAME}
 )
