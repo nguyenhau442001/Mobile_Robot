@@ -1,10 +1,10 @@
 <?xml version="1.0" ?>
-<sdf version="1.6">
+<sdf version="1.7">
   <model name="aws_robomaker_warehouse_RoofB_01">
     <link name="link">
       <inertial>
         <mass>1000</mass>
-        <pose frame=''>0 0 0 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <inertia>
           <ixx>834024.533</ixx>
           <ixy>0</ixy>
