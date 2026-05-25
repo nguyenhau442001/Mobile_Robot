@@ -10,6 +10,7 @@ dependencies = [
     "matplotlib",
     "jax-metal",
     "genesis-world",
+    "torch"
 ]
 
 [tool.setuptools.packages.find]
