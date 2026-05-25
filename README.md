@@ -1,5 +1,27 @@
-# Project Description:
-Build a simulation for a mobile robot using **Gazebo Sim (Harmonic)**, **Genesis**, and **ROS 2 Jazzy**.
+# Differential Drive Mobile Robot
+
+A full-stack mobile robotics simulation project built on **ROS 2 Jazzy**,
+**Gazebo Sim (Harmonic)**, and **Genesis** — from a single URDF to a
+fleet of 100 robots navigating in parallel.
+
+---
+
+## What's inside
+
+| Capability | Stack |
+|---|---|
+| Robot modelling | URDF / xacro, IMU, 2D LiDAR |
+| Physics simulation | Gazebo Sim Harmonic (ODE / TPE / Bullet / DART), Mujoco, Genesis |
+| Autonomous mapping | slam_toolbox (online async) |
+| Autonomous navigation | Nav2 — AMCL, NavFn planner, DWB controller |
+| Multi-robot | N robots sharing one map, independent Nav2 stacks |
+| Teleoperation | Keyboard node + trapezoidal velocity profile controller |
+| Web dashboard | rosbridge + roslibjs / ros2djs / ros3djs — map, LiDAR, teleop in the browser |
+| Fleet simulation | Genesis (Apple Metal / CUDA) — 100+ robots, batched physics, task-assignment fleet manager |
+| Benchmarking | RTF measurement across physics engines, real-time factor analysis |
+
+---
+
 - **mobile_robot_description** → Robot geometry and physical description (URDF/xacro).
 - **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo (10x10 and AWS small-warehouse worlds) and bridging topics.
 - **mobile_robot_slam** → slam_toolbox bring-up (online async) + RViz for mapping.
@@ -11,6 +33,19 @@ Build a simulation for a mobile robot using **Gazebo Sim (Harmonic)**, **Genesis
 - **mobile_robot_mujoco** → Standalone MuJoCo / Gymnasium scratch scripts.
 - **mobile_robot** → Meta-package depending on description, gazebo, navigation2, and teleop.
 
+## Highlights
+
+- **Trapezoidal velocity controller** — 0 → 5 m/s in 5 s, full stop in 1 s,
+  verified against IMU and odometry via rqt_plot
+- **AWS small-warehouse world** — SLAM + Nav2 tested in a realistic
+  warehouse layout, not just an empty box
+- **Genesis fleet manager** — 100 differential-drive robots in a single
+  batched physics step; nearest-task assignment, completion metrics,
+  Apple M-series Metal GPU support
+- **Browser dashboard** — control and monitor the robot from any browser,
+  no RViz needed; same-origin HTTP server eliminates CORS issues
+- **Physics engine benchmarking** — reproducible RTF measurement script
+  to compare ODE vs TPE vs Bullet vs DART on the same world
 
 ## 1. Environment Setup
 Install ROS 2 Jazzy: https://docs.ros.org/en/jazzy/Installation.html
