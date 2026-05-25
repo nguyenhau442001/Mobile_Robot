@@ -50,6 +50,6 @@ with urdf_from_xacro(XACRO, {"mobile_robot_description": ROS_PKG}) as urdf_path:
 
     robot.set_pos(origins)
 
-    print(f"Simulating {N_ENVS} robots — press ESC to exit")
-    for _ in range(1000):
+    print(f"Simulating {N_ENVS} robots — press ESC or Ctrl+C to exit")
+    while scene.viewer.is_alive():
         scene.step()

@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 
 import genesis as gs
@@ -33,6 +32,6 @@ with urdf_from_xacro(XACRO, {"mobile_robot_description": ROS_PKG}) as urdf_path:
 
     scene.build()
 
-    print("Robot loaded — press ESC to exit")
-    for i in range(1000):
+    print("Robot loaded — press ESC or Ctrl+C to exit")
+    while scene.viewer.is_alive():
         scene.step()
