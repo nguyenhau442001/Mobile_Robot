@@ -1,5 +1,13 @@
 # Differential Drive Mobile Robot
 
+![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy-blue?style=flat-square&logo=ros)
+![Gazebo](https://img.shields.io/badge/Gazebo-Harmonic-orange?style=flat-square)
+![Genesis](https://img.shields.io/badge/Genesis-0.4.7-purple?style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.12-yellow?style=flat-square&logo=python)
+![Platform](https://img.shields.io/badge/Platform-Ubuntu_24.04-E95420?style=flat-square&logo=ubuntu)
+![Stars](https://img.shields.io/github/stars/nguyenhau442001/Differential_Drive_Mobile_Robot?style=flat-square)
+![Last Commit](https://img.shields.io/github/last-commit/nguyenhau442001/Differential_Drive_Mobile_Robot?style=flat-square)
+
 A full-stack mobile robotics simulation project built on **ROS 2 Jazzy**,
 **Gazebo Sim (Harmonic)**, and **Genesis** — from a single URDF to a
 fleet of 100 robots navigating in parallel.
