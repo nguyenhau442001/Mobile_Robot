@@ -1,11 +1,15 @@
 # Project Description:
-Build a simulation for a mobile robot using **Gazebo Sim (Harmonic)** and **ROS 2 Jazzy**.
+Build a simulation for a mobile robot using **Gazebo Sim (Harmonic)**, **Genesis**, and **ROS 2 Jazzy**.
 - **mobile_robot_description** → Robot geometry and physical description (URDF/xacro).
 - **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo (10x10 and AWS small-warehouse worlds) and bridging topics.
 - **mobile_robot_slam** → slam_toolbox bring-up (online async) + RViz for mapping.
 - **mobile_robot_navigation2** → Nav2 bring-up against a saved map (AMCL, DWB controller, NavFn planner).
 - **mobile_robot_multi** → Multi-robot Gazebo + Nav2 bring-up (N robots in one world).
 - **mobile_robot_teleop** → Python nodes for teleoperation (keyboard control, trapezoidal velocity controller).
+- **mobile_robot_web** → Browser dashboard via rosbridge + roslibjs / ros2djs / ros3djs (map, lidar scan, pose, goal, teleop).
+- **mobile_robot_genesis** → Genesis physics scripts for batched fleet simulation (100+ robots in parallel envs, fleet manager with task assignment).
+- **mobile_robot_mujoco** → Standalone MuJoCo / Gymnasium scratch scripts.
+- **mobile_robot** → Meta-package depending on description, gazebo, navigation2, and teleop.
 
 
 ## 1. Environment Setup
@@ -317,3 +321,44 @@ Collecting RTF samples for 60s on /world/default/stats...
 **How to read the numbers.** A large gap between **mean** and **median** (here 0.91 vs 1.00) signals occasional stalls dragging the average down — the simulation is mostly real-time but loses ground during bursts of work (model spawns, sensor updates, contact spikes). A high **stdev** confirms that variance, and the **min/max** bracket the worst and best step the host produced over the window.
 
 **Workflow for comparing physics engines.** Swap the engine in the SDF (`<physics name="..." type="ode|tpe|bullet|dart">`), restart Gazebo, run the script against the same world and duration, and compare medians (more robust than means under jitter).
+
+## 8. Web dashboard
+
+The `mobile_robot_web` package serves a browser-based dashboard that talks to ROS 2 over rosbridge. It renders the map, lidar scan, and robot pose, and exposes goal-setting and teleop — handy when you don't want to start RViz.
+
+```bash
+# Terminal 1 — Gazebo + robot (any world)
+ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
+
+# Terminal 2 — Nav2 (optional, only if you want goal-setting from the browser)
+ros2 launch mobile_robot_navigation2 single_robot_nav2.launch.py use_sim_time:=true
+
+# Terminal 3 — rosbridge (port 9090) + HTTP server (port 8000) + auto-open browser
+ros2 launch mobile_robot_web web_bringup.launch.py
+```
+
+A single HTTP server serves both the dashboard assets and the URDF meshes from one port so the 3D view's STL fetches stay same-origin (no CORS plumbing). Override the defaults:
+
+```bash
+ros2 launch mobile_robot_web web_bringup.launch.py http_port:=8080 ws_port:=9091 browser:=google-chrome
+```
+
+> **Browser note.** The launch file defaults to Firefox because Chrome on llvmpipe (no-GPU VMs) refuses to enable WebGL. On Chrome, start it with `--enable-unsafe-swiftshader`, or pass `browser:=xdg-open` to use the system default.
+
+## 9. Genesis — batched fleet simulation
+
+The `mobile_robot_genesis` package contains standalone Genesis scripts that load the same URDF used in Gazebo (via [mobile_robot_genesis/scripts/xacro_loader.py](mobile_robot_genesis/scripts/xacro_loader.py)) and step large fleets in a single batched physics call — useful for fleet-scale RL or task-assignment experiments where launching 100 Gazebo robots is impractical.
+
+```bash
+# Sanity check — one robot, plain URDF → Genesis pipeline
+python3 mobile_robot_genesis/scripts/spawn_mobile_robot.py
+
+# 100 robots in parallel environments (one batched step covers all of them)
+python3 mobile_robot_genesis/scripts/spawn_100_mobile_robots.py
+
+# Fleet manager: 100 robots picking tasks off a shared queue,
+# nearest-task assignment, kinematic motion, completion metrics
+python3 mobile_robot_genesis/scripts/genesis_mobile_robot_fleet.py
+```
+
+Each script runs until the viewer window is closed. The xacro loader resolves `$(find <pkg>)` substitutions without needing the ROS environment sourced, so these scripts work from a plain Python venv as long as `genesis-world` and `xacro` are installed (both pulled in by `pip install -e .` against [pyproject.toml](pyproject.toml)).
