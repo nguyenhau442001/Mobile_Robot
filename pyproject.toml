@@ -5,4 +5,9 @@ description = "Dependencies for the differential drive mobile robot workspace"
 requires-python = ">=3.10"
 dependencies = [
     "trimesh>=4.0",
+    "imageio",
+    "pygame"
 ]
+
+[tool.setuptools.packages.find]
+include = []
