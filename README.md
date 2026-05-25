@@ -105,6 +105,16 @@ source /opt/ros/jazzy/setup.bash
 source install/setup.bash
 ```
 
+### Source the workspace in every new shell
+ROS 2 does not source environments globally — every new terminal needs the ROS 2 distro and this workspace's `install/` overlay sourced before `ros2 run` / `ros2 launch` can find any package in this repo. Append both `source` lines to your shell rc once so it happens automatically on every new shell:
+
+```bash
+echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
+echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
+```
+
+If you also use the Python venv from section 1, activate it **before** the ROS sources by prepending to the same file.
+
 ## 3. Robot description
   Robot Structure Overview:
   - Chassis (base)
@@ -128,12 +138,7 @@ evince frames.pdf
 
 
 ## 4. SLAM
-SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal. Every new shell needs the workspace sourced:
-```bash
-cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
-```
+SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal. Source the workspace in every new shell (see [section 2](#source-the-workspace-in-every-new-shell)).
 
 ```bash
 # Terminal 1 — launch the mobile robot in Gazebo (10x10 world by default)
@@ -190,12 +195,7 @@ ros2 launch mobile_robot_gazebo no_roof_small_warehouse.launch.py x_pos:=1.5 y_p
 Map the new world by running slam_toolbox the same way as above, then save under `mobile_robot_navigation2/maps/<name>/` so Nav2 can load it via `map_name:=<name>`.
 
 ## 5. Navigation (Nav2 with DWB controller and NavFn planner)
-Nav2 runs against the saved map produced in section 4 — no slam_toolbox needed at navigation time. Every new shell needs the workspace sourced:
-```bash
-cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
-```
+Nav2 runs against the saved map produced in section 4 — no slam_toolbox needed at navigation time. Source the workspace in every new shell (see [section 2](#source-the-workspace-in-every-new-shell)).
 
 ### Single robot
 ```bash
@@ -234,11 +234,10 @@ To move to a goal, click **Nav2 Goal** and set the goal location and pose.
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/aee2a359-069e-47e6-b6ca-138fd3075ada" />
 
 ## 6. Controller
+Source the workspace in every new shell (see [section 2](#source-the-workspace-in-every-new-shell)).
+
 ### Verify the velocity
 ```bash
-cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
 ros2 run rqt_plot rqt_plot
 ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 ros2 run mobile_robot_teleop mobile_robot_teleop_key --ros-args -r cmd_vel:=/cmd_vel
@@ -298,9 +297,6 @@ improves robot stability.
 The `trapezoid_cmd_vel_node` was created to send the desired velocity to the robot.
 
 ```bash
-cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
 ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
 ros2 launch mobile_robot_teleop trapezoid_profile_controller.launch.py
 ```
