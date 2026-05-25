@@ -8,7 +8,8 @@ dependencies = [
     "imageio",
     "pygame",
     "matplotlib",
-    "jax-metal"
+    "jax-metal",
+    "genesis-world",
 ]
 
 [tool.setuptools.packages.find]
