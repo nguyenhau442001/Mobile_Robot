@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-ROS Node: Trapezoidal Velocity Controller
------------------------------------------
+ROS 2 Node: Trapezoidal Velocity Controller
+-------------------------------------------
 This node generates a trapezoidal velocity profile and publishes
 linear velocity commands to the /cmd_vel topic.
 
@@ -17,12 +17,15 @@ we gradually ramp up and ramp down the velocity over time (dt). This prevents
 jerky motion and helps maintain robot stability.
 """
 
-import rospy
 import math
+
+import rclpy
+from rclpy.node import Node
 from geometry_msgs.msg import Twist
 
 # Default time step (s) for discretizing the velocity profile
 DEFAULT_DT = 0.01
+
 
 def trapezoid_profile(v_target, t_acc, t_cruise, t_dec, dt=DEFAULT_DT):
     """
@@ -68,7 +71,7 @@ def trapezoid_profile(v_target, t_acc, t_cruise, t_dec, dt=DEFAULT_DT):
     # -----------------------------
     # Smoothly reduce velocity using a cosine shape:
     # v(t) = 0.5 * v_target * (1 + cos(pi * tau))
-    # Where tau goes from 0 → 1 across the deceleration period
+    # Where tau goes from 0 -> 1 across the deceleration period
     while t < t_acc + t_cruise + t_dec:
         tau = (t - (t_acc + t_cruise)) / t_dec  # Normalize time to [0, 1]
         v = 0.5 * v_target * (1 + math.cos(math.pi * tau))
@@ -78,65 +81,73 @@ def trapezoid_profile(v_target, t_acc, t_cruise, t_dec, dt=DEFAULT_DT):
     return profile
 
 
-def run_node():
+class TrapezoidProfileController(Node):
     """
-    Main function to run the ROS node.
-    Reads parameters, generates the velocity profile, and publishes Twist messages.
+    ROS 2 node that publishes a precomputed trapezoidal velocity profile
+    on /cmd_vel using a wall timer to maintain real-time pacing.
     """
-    rospy.init_node("trapezoid_cmd_vel_node")
 
-    v_target = 5.0      # Target velocity (m/s)
-    t_acc    = 5.0      # Acceleration duration (s)
-    # t_cruise + t_dec should equal 1.0 second
-    t_cruise = 0.2      # Cruise duration (s)
-    t_dec    = 0.8      # Deceleration duration (s)
-    dt = DEFAULT_DT     # Time step for updates (s)
-    max_vel_limit = 6.0 # Safety velocity limit (m/s)
+    def __init__(self):
+        super().__init__('trapezoid_profile_controller')
 
-    # ------------------------------------------------------
-    # Create publisher for /cmd_vel topic
-    # ------------------------------------------------------
-    pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
+        # Declare parameters so values can be overridden from launch / CLI
+        self.declare_parameter('v_target', 5.0)
+        self.declare_parameter('t_acc', 5.0)
+        self.declare_parameter('t_cruise', 0.2)
+        self.declare_parameter('t_dec', 0.8)
+        self.declare_parameter('dt', DEFAULT_DT)
+        self.declare_parameter('max_vel_limit', 6.0)
 
-    # ------------------------------------------------------
-    # Generate trapezoidal velocity profile
-    # ------------------------------------------------------
-    profile = trapezoid_profile(v_target, t_acc, t_cruise, t_dec, dt)
-    rospy.loginfo(f"Generated velocity profile with {len(profile)} points")
+        v_target = self.get_parameter('v_target').value
+        t_acc = self.get_parameter('t_acc').value
+        t_cruise = self.get_parameter('t_cruise').value
+        t_dec = self.get_parameter('t_dec').value
+        self.dt = self.get_parameter('dt').value
+        self.max_vel_limit = self.get_parameter('max_vel_limit').value
 
-    # ROS rate controller to publish at real-time speed
-    rate = rospy.Rate(1.0 / dt)
-    rospy.loginfo("Starting trapezoidal velocity profile...")
+        self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
-    # ------------------------------------------------------
-    # Publish velocity commands to /cmd_vel
-    # ------------------------------------------------------
-    for current_time, velocity in profile:
-        # Stop if ROS shuts down (Ctrl+C or shutdown signal)
-        if rospy.is_shutdown():
-            break
+        self.profile = trapezoid_profile(v_target, t_acc, t_cruise, t_dec, self.dt)
+        self.get_logger().info(
+            f'Generated velocity profile with {len(self.profile)} points')
+
+        self.index = 0
+        self.timer = self.create_timer(self.dt, self._tick)
+        self.get_logger().info('Starting trapezoidal velocity profile...')
+
+    def _tick(self):
+        if self.index >= len(self.profile):
+            self.pub.publish(Twist())
+            self.get_logger().info('Profile complete. Robot stopped.')
+            self.timer.cancel()
+            return
+
+        _, velocity = self.profile[self.index]
+        self.index += 1
 
         # Clamp velocity to safety limits
-        safe_velocity = min(max(velocity, 0.0), max_vel_limit)
+        safe_velocity = min(max(velocity, 0.0), self.max_vel_limit)
 
-        # Prepare Twist message
         msg = Twist()
-        msg.linear.x = safe_velocity  # Forward velocity
-        msg.angular.z = 0.0           # No rotation
-
-        pub.publish(msg)
-        rate.sleep()
-
-    # ------------------------------------------------------
-    # Ensure the robot completely stops at the end
-    # ------------------------------------------------------
-    pub.publish(Twist())
-    rospy.loginfo("Profile complete. Robot stopped.")
+        msg.linear.x = safe_velocity
+        msg.angular.z = 0.0
+        self.pub.publish(msg)
 
 
-if __name__ == "__main__":
+def main(args=None):
+    rclpy.init(args=args)
+    node = TrapezoidProfileController()
     try:
-        run_node()
-    except rospy.ROSInterruptException:
-        # Graceful shutdown on ROS interrupt
+        rclpy.spin(node)
+    except KeyboardInterrupt:
         pass
+    finally:
+        # Ensure the robot completely stops at the end
+        node.pub.publish(Twist())
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

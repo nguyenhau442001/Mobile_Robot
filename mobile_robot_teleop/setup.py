@@ -22,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mobile_robot_teleop_key = mobile_robot_teleop.mobile_robot_teleop_key:main',
+            'trapezoid_profile_controller = mobile_robot_teleop.trapezoid_profile_controller:main',
         ],
     },
 )
