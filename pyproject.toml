@@ -8,7 +8,7 @@ dependencies = [
     "imageio",
     "pygame",
     "matplotlib",
-    "jax-metal",
+    "jax-metal; sys_platform == 'darwin'",
     "genesis-world",
     "torch"
 ]
