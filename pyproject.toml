@@ -7,7 +7,8 @@ dependencies = [
     "trimesh>=4.0",
     "imageio",
     "pygame",
-    "matplotlib"
+    "matplotlib",
+    "jax-metal"
 ]
 
 [tool.setuptools.packages.find]
