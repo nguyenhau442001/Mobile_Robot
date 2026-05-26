@@ -12,6 +12,8 @@ A full-stack mobile robotics simulation project built on **ROS 2 Jazzy**,
 **Gazebo Sim (Harmonic)**, and **Genesis** — from a single URDF to a
 fleet of 100 robots navigating in parallel.
 
+▶️ **[Watch Full Demo on YouTube](https://www.youtube.com/watch?v=wHatIgc6cNg&t=398s)**
+
 ---
 
 ## What's inside
