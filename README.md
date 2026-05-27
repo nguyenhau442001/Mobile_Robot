@@ -58,7 +58,11 @@ fleet of 100 robots navigating in parallel.
   to compare ODE vs TPE vs Bullet vs DART on the same world
 
 ## 1. Environment Setup
+
+### Ubuntu 24.04
+
 Install ROS 2 Jazzy: https://docs.ros.org/en/jazzy/Installation.html
+
 ```bash
 sudo apt update
 sudo apt install \
@@ -71,8 +75,11 @@ sudo apt install \
   ros-jazzy-robot-localization
 ```
 
-### Python virtual environment (for `trimesh` and other pip-only deps)
-Ubuntu 24.04 is PEP 668 protected, so pip-only packages (like `trimesh`) cannot be installed into the system Python directly. We use a venv with `--system-site-packages` so ROS 2 packages (`rclpy`, etc.) remain importable from inside the venv.
+#### Python virtual environment (for `trimesh` and other pip-only deps)
+
+Ubuntu 24.04 is PEP 668 protected, so pip-only packages (like `trimesh`) cannot be
+installed into the system Python directly. We use a venv with `--system-site-packages`
+so ROS 2 packages (`rclpy`, etc.) remain importable from inside the venv.
 
 ```bash
 # One-time: install the venv module (Ubuntu 24.04 / Python 3.12)
@@ -86,6 +93,7 @@ python3 -m venv --system-site-packages ~/.venvs/robot
 ```
 
 Activate it before running ROS 2 nodes that need the pip-installed deps:
+
 ```bash
 source ~/.venvs/robot/bin/activate
 source /opt/ros/jazzy/setup.bash
@@ -93,9 +101,77 @@ source ~/ros2_ws/install/setup.bash
 ```
 
 Verify:
+
 ```bash
 python -c "import trimesh, rclpy; print('trimesh', trimesh.__version__, '| rclpy OK')"
 ```
+
+---
+
+### macOS (Sequoia / Tahoe)
+
+> **Strategy:** Everything runs natively — no Docker required.
+> ROS 2 Jazzy via conda (`robostack-jazzy` channel), Gazebo Sim Harmonic via Homebrew.
+
+#### 1.1 Install Miniforge
+
+```bash
+brew install miniforge
+```
+
+Restart terminal, then verify:
+
+```bash
+conda --version
+```
+
+#### 1.2 Create ROS 2 Jazzy Environment
+
+```bash
+conda create -n ros2_jazzy -c conda-forge -c robostack-jazzy ros-jazzy-desktop
+```
+
+> ⏳ This downloads ~1 GB of packages. Type `y` when prompted.
+
+#### 1.3 Activate and Verify
+
+```bash
+conda activate ros2_jazzy
+printenv ROS_DISTRO    # expected: jazzy
+ros2 --help            # expected: list of ros2 commands
+```
+
+#### 1.4 Install Project Packages
+
+```bash
+conda install -c conda-forge -c robostack-jazzy \
+  ros-jazzy-navigation2 \
+  ros-jazzy-nav2-bringup \
+  ros-jazzy-slam-toolbox \
+  ros-jazzy-xacro \
+  ros-jazzy-tf2-tools \
+  ros-jazzy-robot-localization \
+  ros-jazzy-teleop-twist-keyboard
+```
+
+#### 1.5 Install Python Dependencies
+
+```bash
+pip install -e ~/ros2_ws/src/Differential_Drive_Mobile_Robot
+```
+
+#### 1.6 Install Gazebo Sim Harmonic
+
+```bash
+brew tap osrf/simulation
+brew update
+brew install gz-harmonic
+```
+
+#### ⚠️ macOS limitation — gz sim requires two terminals
+
+On macOS, `gz sim` server and GUI must run in separate terminals
+
 
 ## 2. Clone the source code from GitHub and build the packages
 ```bash
