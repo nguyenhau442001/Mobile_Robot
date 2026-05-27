@@ -151,16 +151,27 @@ conda install -c conda-forge -c robostack-jazzy \
   ros-jazzy-xacro \
   ros-jazzy-tf2-tools \
   ros-jazzy-robot-localization \
-  ros-jazzy-teleop-twist-keyboard
+  ros-jazzy-teleop-twist-keyboard \
+  ros-jazzy-ros-gz-bridge \
+  ros-jazzy-ros-gz-sim \
+  ros-jazzy-ros-gz
+
 ```
 
-#### 1.5 Install Python Dependencies
+#### 1.5 Install Build Tools
+
+```bash
+conda install -c conda-forge colcon-common-extensions
+```
+
+
+#### 1.6 Install Python Dependencies
 
 ```bash
 pip install -e ~/ros2_ws/src/Differential_Drive_Mobile_Robot
 ```
 
-#### 1.6 Install Gazebo Sim Harmonic
+#### 1.7 Install Gazebo Sim Harmonic
 
 ```bash
 brew tap osrf/simulation
