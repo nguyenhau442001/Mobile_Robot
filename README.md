@@ -59,6 +59,28 @@ fleet of 100 robots navigating in parallel.
 
 ## 1. Environment Setup
 
+#### Clone and build
+
+```bash
+mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
+git clone -b jazzy https://github.com/nguyenhau442001/Differential_Drive_Mobile_Robot.git
+```
+
+### macOS (Tahoe)
+
+Run the one-line setup script — it handles everything
+(Miniconda, ROS 2 Jazzy via RoboStack, Nav2, Gazebo, SLAM, Python deps, colcon build, and shell config):
+
+```bash
+cd ~/ros2_ws/src/Differential_Drive_Mobile_Robot
+chmod +x setup_macos.sh && ./setup_macos.sh
+```
+
+> ⏳ First run takes ~10–20 minutes (downloads ~1 GB of conda packages).  
+> When it finishes, open a new terminal — `ros2 topic list` should work immediately.
+
+---
+
 ### Ubuntu 24.04
 
 Install ROS 2 Jazzy: https://docs.ros.org/en/jazzy/Installation.html
@@ -106,105 +128,17 @@ Verify:
 python -c "import trimesh, rclpy; print('trimesh', trimesh.__version__, '| rclpy OK')"
 ```
 
----
+#### Source the workspace in every new shell
 
-### macOS (Sequoia / Tahoe)
-
-> **Strategy:** Everything runs natively — no Docker required.
-> ROS 2 Jazzy via conda (`robostack-jazzy` channel), Gazebo Sim Harmonic via Homebrew.
-
-#### 1.1 Install Miniforge
-
-```bash
-brew install miniforge
-```
-
-Restart terminal, then verify:
-
-```bash
-conda --version
-```
-
-#### 1.2 Create ROS 2 Jazzy Environment
-
-```bash
-conda create -n ros2_jazzy -c conda-forge -c robostack-jazzy ros-jazzy-desktop
-```
-
-> ⏳ This downloads ~1 GB of packages. Type `y` when prompted.
-
-#### 1.3 Activate and Verify
-
-```bash
-conda activate ros2_jazzy
-printenv ROS_DISTRO    # expected: jazzy
-ros2 --help            # expected: list of ros2 commands
-```
-
-#### 1.4 Install Project Packages
-
-```bash
-conda install -c conda-forge -c robostack-jazzy \
-  ros-jazzy-navigation2 \
-  ros-jazzy-nav2-bringup \
-  ros-jazzy-slam-toolbox \
-  ros-jazzy-xacro \
-  ros-jazzy-tf2-tools \
-  ros-jazzy-robot-localization \
-  ros-jazzy-teleop-twist-keyboard \
-  ros-jazzy-ros-gz-bridge \
-  ros-jazzy-ros-gz-sim \
-  ros-jazzy-ros-gz
-
-```
-
-#### 1.5 Install Build Tools
-
-```bash
-conda install -c conda-forge colcon-common-extensions
-```
-
-
-#### 1.6 Install Python Dependencies
-
-```bash
-pip install -e ~/ros2_ws/src/Differential_Drive_Mobile_Robot
-```
-
-#### 1.7 Install Gazebo Sim Harmonic
-
-```bash
-brew tap osrf/simulation
-brew update
-brew install gz-harmonic
-```
-
-#### ⚠️ macOS limitation — gz sim requires two terminals
-
-On macOS, `gz sim` server and GUI must run in separate terminals
-
-
-## 2. Clone the source code from GitHub and build the packages
-```bash
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
-git clone git@github.com:nguyenhau442001/Differential_Drive_Mobile_Robot.git
-cd ~/ros2_ws
-colcon build --symlink-install
-source /opt/ros/jazzy/setup.bash
-source install/setup.bash
-```
-
-### Source the workspace in every new shell
-ROS 2 does not source environments globally — every new terminal needs the ROS 2 distro and this workspace's `install/` overlay sourced before `ros2 run` / `ros2 launch` can find any package in this repo. Append both `source` lines to your shell rc once so it happens automatically on every new shell:
+ROS 2 does not source environments globally — every new terminal needs the ROS 2 distro
+and this workspace's `install/` overlay sourced. Append both lines to your shell rc once:
 
 ```bash
 echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
 echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
 ```
 
-If you also use the Python venv from section 1, activate it **before** the ROS sources by prepending to the same file.
-
-## 3. Robot description
+## 2. Robot description
   Robot Structure Overview:
   - Chassis (base)
   - 4 Caster links (non-driven support wheels)
@@ -226,8 +160,8 @@ evince frames.pdf
 <img width="1660" height="355" alt="image" src="https://github.com/user-attachments/assets/f0e7d94b-a6f3-4449-afa0-6563179bcbc4" />
 
 
-## 4. SLAM
-SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal. Source the workspace in every new shell (see [section 2](#source-the-workspace-in-every-new-shell)).
+## 3. SLAM
+SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal. Source the workspace in every new shell (see [section 1 — Source the workspace](#source-the-workspace-in-every-new-shell)).
 
 ```bash
 # Terminal 1 — launch the mobile robot in Gazebo (10x10 world by default)
@@ -283,8 +217,8 @@ ros2 launch mobile_robot_gazebo no_roof_small_warehouse.launch.py x_pos:=1.5 y_p
 ```
 Map the new world by running slam_toolbox the same way as above, then save under `mobile_robot_navigation2/maps/<name>/` so Nav2 can load it via `map_name:=<name>`.
 
-## 5. Navigation (Nav2 with DWB controller and NavFn planner)
-Nav2 runs against the saved map produced in section 4 — no slam_toolbox needed at navigation time. Source the workspace in every new shell (see [section 2](#source-the-workspace-in-every-new-shell)).
+## 4. Navigation (Nav2 with DWB controller and NavFn planner)
+Nav2 runs against the saved map produced in section 3 — no slam_toolbox needed at navigation time. Source the workspace in every new shell (see [section 1 — Source the workspace](#source-the-workspace-in-every-new-shell)).
 
 ### Single robot
 ```bash
@@ -322,8 +256,8 @@ To move to a goal, click **Nav2 Goal** and set the goal location and pose.
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/ca103906-d5ed-46c6-affd-837b079a9dd5" />
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/aee2a359-069e-47e6-b6ca-138fd3075ada" />
 
-## 6. Controller
-Source the workspace in every new shell (see [section 2](#source-the-workspace-in-every-new-shell)).
+## 5. Controller
+Source the workspace in every new shell (see [section 1 — Source the workspace](#source-the-workspace-in-every-new-shell)).
 
 ### Verify the velocity
 ```bash
@@ -393,7 +327,7 @@ ros2 launch mobile_robot_teleop trapezoid_profile_controller.launch.py
 The robot accelerates from standstill (t = 9) to 5 m/s (t = 14), then decelerates from 5 m/s (t = 14) to 0 m/s (t = 15).
 <img width="1827" height="746" alt="image" src="https://github.com/user-attachments/assets/e92fa2c7-2004-4760-afc4-ae60f8adcf35" />
 
-## 7. Real-Time Factor (RTF)
+## 6. Real-Time Factor (RTF)
 
 The **Real-Time Factor** is the ratio between simulated time and wall-clock time. RTF = 1.0 means the simulation advances at real speed; RTF < 1.0 means the physics step is too expensive for the host to keep up, and RTF > 1.0 means it is running faster than real time. Tracking RTF is the standard way to compare the cost of different physics engines (ODE, TPE, Bullet, DART) or to detect when world complexity has outgrown the host.
 
@@ -450,7 +384,7 @@ Collecting RTF samples for 60s on /world/default/stats...
 
 **Workflow for comparing physics engines.** Swap the engine in the SDF (`<physics name="..." type="ode|tpe|bullet|dart">`), restart Gazebo, run the script against the same world and duration, and compare medians (more robust than means under jitter).
 
-## 8. Web dashboard
+## 7. Web dashboard
 
 The `mobile_robot_web` package serves a browser-based dashboard that talks to ROS 2 over rosbridge. It renders the map, lidar scan, and robot pose, and exposes goal-setting and teleop — handy when you don't want to start RViz.
 
@@ -473,7 +407,7 @@ ros2 launch mobile_robot_web web_bringup.launch.py http_port:=8080 ws_port:=9091
 
 > **Browser note.** The launch file defaults to Firefox because Chrome on llvmpipe (no-GPU VMs) refuses to enable WebGL. On Chrome, start it with `--enable-unsafe-swiftshader`, or pass `browser:=xdg-open` to use the system default.
 
-## 9. Genesis — batched fleet simulation
+## 8. Genesis — batched fleet simulation
 
 The `mobile_robot_genesis` package contains standalone Genesis scripts that load the same URDF used in Gazebo (via [mobile_robot_genesis/scripts/xacro_loader.py](mobile_robot_genesis/scripts/xacro_loader.py)) and step large fleets in a single batched physics call — useful for fleet-scale RL or task-assignment experiments where launching 100 Gazebo robots is impractical.
 
