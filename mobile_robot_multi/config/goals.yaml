@@ -1,3 +1,4 @@
+---
 # Hardcoded Nav2 goals for testing multi-robot navigation.
 #
 # Each entry maps a robot namespace to a target pose in the (shared) `map`

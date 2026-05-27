@@ -1,11 +1,12 @@
+---
 bt_navigator:
   ros__parameters:
     global_frame: map
     robot_base_frame: chassis
     transform_tolerance: 0.5
     filter_duration: 0.3
-    default_nav_to_pose_bt_xml: "$(find-pkg-share nav2_bt_navigator)/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml"
-    default_nav_through_poses_bt_xml: "$(find-pkg-share nav2_bt_navigator)/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml"
+    default_nav_to_pose_bt_xml: "$(find-pkg-share nav2_bt_navigator)/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml"  # yamllint disable-line rule:line-length
+    default_nav_through_poses_bt_xml: "$(find-pkg-share nav2_bt_navigator)/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml"  # yamllint disable-line rule:line-length
     always_reload_bt_xml: false
     goal_blackboard_id: goal
     goals_blackboard_id: goals

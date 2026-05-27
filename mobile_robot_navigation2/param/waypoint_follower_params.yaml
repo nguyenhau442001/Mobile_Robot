@@ -1,3 +1,4 @@
+---
 waypoint_follower:
   ros__parameters:
     loop_rate: 20

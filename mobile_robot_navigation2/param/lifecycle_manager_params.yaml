@@ -1,3 +1,4 @@
+---
 lifecycle_manager_localization:
   ros__parameters:
     autostart: true

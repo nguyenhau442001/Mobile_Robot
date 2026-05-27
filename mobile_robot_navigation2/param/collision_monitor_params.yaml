@@ -1,3 +1,4 @@
+---
 collision_monitor:
   ros__parameters:
     base_frame_id: "chassis"
@@ -7,7 +8,7 @@ collision_monitor:
     state_topic: "collision_monitor_state"
     transform_tolerance: 0.5
     source_timeout: 2.0
-    base_shift_correction: True
+    base_shift_correction: true
     stop_pub_timeout: 2.0
     use_realtime_priority: false
     enable_stamped_cmd_vel: false
@@ -17,13 +18,13 @@ collision_monitor:
       radius: 0.3
       action_type: "stop"
       min_points: 4
-      visualize: True
+      visualize: true
       polygon_pub_topic: "polygon_stop"
-      enabled: True
+      enabled: true
     observation_sources: ["scan"]
     scan:
       type: "scan"
       topic: "scan"
       min_height: 0.15
       max_height: 2.0
-      enabled: True
+      enabled: true

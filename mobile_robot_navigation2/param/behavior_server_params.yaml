@@ -1,3 +1,4 @@
+---
 behavior_server:
   ros__parameters:
     local_costmap_topic: local_costmap/costmap_raw
