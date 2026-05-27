@@ -16,6 +16,7 @@ import trimesh
 #     └── meshes/*.STL
 MESHES_DIR = Path(__file__).resolve().parent.parent / "meshes"
 
+
 def inspect(mesh_path):
     """Print bounding box, center of mass, and a suggested URDF primitive."""
     # force="mesh" flattens multi-part STLs so .volume / .area are available.
@@ -59,7 +60,9 @@ def suggest_primitive(bx, by, bz, ox=0.0, oy=0.0, oz=0.0):
     URDF <origin> so the suggested primitive actually overlaps the mesh.
     """
     tol = 0.02 * max(bx, by, bz)
-    near = lambda a, b: abs(a - b) < tol
+
+    def near(a, b):
+        return abs(a - b) < tol
 
     origin_xyz = f'{ox:.4f} {oy:.4f} {oz:.4f}'
 
@@ -67,10 +70,10 @@ def suggest_primitive(bx, by, bz, ox=0.0, oy=0.0, oz=0.0):
     if near(bx, by) and near(by, bz):
         r = (bx + by + bz) / 6.0  # average of half-extents
         print(f"  Suggested primitive    :  SPHERE  radius={r:.4f}")
-        print(f"  URDF snippet           :  <collision>")
+        print("  URDF snippet           :  <collision>")
         print(f"                              <origin xyz=\"{origin_xyz}\" rpy=\"0 0 0\"/>")
         print(f"                              <geometry><sphere radius=\"{r:.4f}\"/></geometry>")
-        print(f"                            </collision>")
+        print("                            </collision>")
         return
 
     # ---- Cylinder: two extents equal => the third is the axis (length) ------
@@ -84,17 +87,26 @@ def suggest_primitive(bx, by, bz, ox=0.0, oy=0.0, oz=0.0):
     else:
         # ---- Box: nothing matched -> all three dimensions differ -----------
         print(f"  Suggested primitive    :  BOX  {bx:.4f} x {by:.4f} x {bz:.4f}")
-        print(f"  URDF snippet           :  <collision>")
+        print("  URDF snippet           :  <collision>")
         print(f"                              <origin xyz=\"{origin_xyz}\" rpy=\"0 0 0\"/>")
-        print(f"                              <geometry><box size=\"{bx:.4f} {by:.4f} {bz:.4f}\"/></geometry>")
-        print(f"                            </collision>")
+        print(
+            f"                              <geometry>"
+            f"<box size=\"{bx:.4f} {by:.4f} {bz:.4f}\"/>"
+            f"</geometry>")
+        print("                            </collision>")
         return
 
-    print(f"  Suggested primitive    :  CYLINDER  radius={radius:.4f}  length={length:.4f}  axis={axis_note}")
-    print(f"  URDF snippet           :  <collision>")
+    print(
+        f"  Suggested primitive    :  CYLINDER  radius={
+            radius:.4f}  length={
+            length:.4f}  axis={axis_note}")
+    print("  URDF snippet           :  <collision>")
     print(f"                              <origin xyz=\"{origin_xyz}\" rpy=\"{rpy}\"/>")
-    print(f"                              <geometry><cylinder radius=\"{radius:.4f}\" length=\"{length:.4f}\"/></geometry>")
-    print(f"                            </collision>")
+    print(
+        f"                              <geometry>"
+        f"<cylinder radius=\"{radius:.4f}\" length=\"{length:.4f}\"/>"
+        f"</geometry>")
+    print("                            </collision>")
 
 
 # Pick which meshes to inspect: command-line names, or every *.STL by default.

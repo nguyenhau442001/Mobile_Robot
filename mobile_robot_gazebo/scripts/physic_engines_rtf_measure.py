@@ -3,14 +3,18 @@
 Benchmark RTF for ODE/TPE/Bullet/DART in gz-sim.
 On Harmonic use gz.transport13 / gz.msgs10.world_stats_pb2 instead.
 """
-import time, argparse, statistics
+import time
+import argparse
+import statistics
 from gz.transport import Node
 from gz.msgs.world_stats_pb2 import WorldStatistics
 
 rtf_samples = []
 
+
 def on_stats(msg: WorldStatistics):
     rtf_samples.append(msg.real_time_factor)
+
 
 def main(duration: int, world: str = "default"):
     node = Node()
@@ -20,7 +24,7 @@ def main(duration: int, world: str = "default"):
     time.sleep(duration)
 
     if rtf_samples:
-        print(f"\n=== RTF Benchmark Results ===")
+        print("\n=== RTF Benchmark Results ===")
         print(f"  Samples     : {len(rtf_samples)}")
         print(f"  Mean RTF    : {statistics.mean(rtf_samples):.4f}")
         print(f"  Median RTF  : {statistics.median(rtf_samples):.4f}")
@@ -29,6 +33,7 @@ def main(duration: int, world: str = "default"):
         print(f"  Max RTF     : {max(rtf_samples):.4f}")
     else:
         print("No samples received. Is the simulation running?")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

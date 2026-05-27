@@ -155,15 +155,17 @@ class FleetSupervisor(Node):
     def _check_conflicts(self):
         actives = [
             r for r in self.robots
-            if self.paths[r] is not None
-            and self.goal_first_seen[r] is not None
-            and r not in self.canceled
+            if (self.paths[r] is not None
+                and self.goal_first_seen[r] is not None
+                and r not in self.canceled)
         ]
         for i, r1 in enumerate(actives):
             for r2 in actives[i + 1:]:
                 if self._paths_conflict(self.paths[r1], self.paths[r2]):
-                    loser = (r1 if self.goal_first_seen[r1] >
-                             self.goal_first_seen[r2] else r2)
+                    loser = (
+                        r1 if self.goal_first_seen[r1] > self.goal_first_seen[r2]
+                        else r2
+                    )
                     winner = r2 if loser == r1 else r1
                     self.get_logger().warn(
                         f'CONFLICT: {r1} & {r2} paths cross within '

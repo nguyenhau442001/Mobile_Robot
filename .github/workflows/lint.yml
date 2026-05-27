@@ -28,6 +28,7 @@ jobs:
           flake8 . \
             --max-line-length=100 \
             --exclude=build,install,log,__pycache__,.git \
+            --extend-ignore=W503 \
             --statistics \
             --count
 

@@ -54,8 +54,6 @@ def _grid_robots(n, spacing=1.5):
     ]
 
 
-
-
 def _spawn_action(robot):
     """The gz `create` Node — kept separate so spawns can be chained sequentially."""
     name = robot['name']

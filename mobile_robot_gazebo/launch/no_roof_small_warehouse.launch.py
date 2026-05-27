@@ -17,20 +17,20 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 import launch
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 def generate_launch_description():
-    ld = launch.LaunchDescription([
-        launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
-                [get_package_share_directory(
-                    'mobile_robot_gazebo'), '/launch/small_warehouse.launch.py']
-            ),
-            launch_arguments={
-                'world': os.path.join(get_package_share_directory('mobile_robot_gazebo'), 'worlds', 'no_roof_small_warehouse', 'no_roof_small_warehouse.world')
-            }.items()
-        )
-    ])
+    ld = launch.LaunchDescription(
+        [
+            launch.actions.IncludeLaunchDescription(
+                launch.launch_description_sources.PythonLaunchDescriptionSource(
+                    [
+                        get_package_share_directory('mobile_robot_gazebo'),
+                        '/launch/small_warehouse.launch.py']),
+                launch_arguments={
+                    'world': os.path.join(
+                        get_package_share_directory('mobile_robot_gazebo'),
+                        'worlds',
+                        'no_roof_small_warehouse',
+                        'no_roof_small_warehouse.world')}.items())])
     return ld

@@ -4,14 +4,14 @@ gs.init(backend=gs.metal)
 
 # Create scene
 scene = gs.Scene(
-    show_viewer = True,
-    viewer_options = gs.options.ViewerOptions(
-        camera_pos    = (3.5, -1.0, 2.5),
-        camera_lookat = (0.0,  0.0, 0.5),
-        camera_fov    = 40,
+    show_viewer=True,
+    viewer_options=gs.options.ViewerOptions(
+        camera_pos=(3.5, -1.0, 2.5),
+        camera_lookat=(0.0, 0.0, 0.5),
+        camera_fov=40,
     ),
-    sim_options = gs.options.SimOptions(
-        dt = 0.01,
+    sim_options=gs.options.SimOptions(
+        dt=0.01,
     ),
 )
 

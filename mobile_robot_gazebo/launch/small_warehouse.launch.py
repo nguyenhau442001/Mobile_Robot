@@ -100,7 +100,7 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
-            '/world/default/model/mobile_robot/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
+            '/world/default/model/mobile_robot/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',  # noqa: E501
         ],
         remappings=[
             ('/world/default/model/mobile_robot/joint_state', '/joint_states'),

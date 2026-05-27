@@ -79,19 +79,23 @@ def main():
         while True:
             key = get_key(settings)
             if key == 'w':
-                target_linear_vel = constrain(target_linear_vel + LIN_VEL_STEP_SIZE, -MAX_LIN_VEL, MAX_LIN_VEL)
+                target_linear_vel = constrain(
+                    target_linear_vel + LIN_VEL_STEP_SIZE, -MAX_LIN_VEL, MAX_LIN_VEL)
                 status += 1
                 print(vels(target_linear_vel, target_angular_vel))
             elif key == 'x':
-                target_linear_vel = constrain(target_linear_vel - LIN_VEL_STEP_SIZE, -MAX_LIN_VEL, MAX_LIN_VEL)
+                target_linear_vel = constrain(
+                    target_linear_vel - LIN_VEL_STEP_SIZE, -MAX_LIN_VEL, MAX_LIN_VEL)
                 status += 1
                 print(vels(target_linear_vel, target_angular_vel))
             elif key == 'a':
-                target_angular_vel = constrain(target_angular_vel + ANG_VEL_STEP_SIZE, -MAX_ANG_VEL, MAX_ANG_VEL)
+                target_angular_vel = constrain(
+                    target_angular_vel + ANG_VEL_STEP_SIZE, -MAX_ANG_VEL, MAX_ANG_VEL)
                 status += 1
                 print(vels(target_linear_vel, target_angular_vel))
             elif key == 'd':
-                target_angular_vel = constrain(target_angular_vel - ANG_VEL_STEP_SIZE, -MAX_ANG_VEL, MAX_ANG_VEL)
+                target_angular_vel = constrain(
+                    target_angular_vel - ANG_VEL_STEP_SIZE, -MAX_ANG_VEL, MAX_ANG_VEL)
                 status += 1
                 print(vels(target_linear_vel, target_angular_vel))
             elif key == ' ' or key == 's':
