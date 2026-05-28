@@ -50,3 +50,8 @@ qtcreator-*
 # Catkin custom files
 CATKIN_IGNORE
 .vscode/settings.json
+differential_drive_mobile_robot.egg-info/dependency_links.txt
+differential_drive_mobile_robot.egg-info/PKG-INFO
+differential_drive_mobile_robot.egg-info/requires.txt
+differential_drive_mobile_robot.egg-info/SOURCES.txt
+differential_drive_mobile_robot.egg-info/top_level.txt
