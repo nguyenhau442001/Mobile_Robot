@@ -68,74 +68,18 @@ git clone -b jazzy https://github.com/nguyenhau442001/Differential_Drive_Mobile_
 
 ### macOS (Tahoe)
 
-Run the one-line setup script — it handles everything
-(Miniconda, ROS 2 Jazzy via RoboStack, Nav2, Gazebo, SLAM, Python deps, colcon build, and shell config):
-
 ```bash
 cd ~/ros2_ws/src/Differential_Drive_Mobile_Robot
 chmod +x setup_macos.sh && ./setup_macos.sh
 ```
 
-> ⏳ First run takes ~10–20 minutes (downloads ~1 GB of conda packages).  
-> When it finishes, open a new terminal — `ros2 topic list` should work immediately.
-
 ---
 
 ### Ubuntu 24.04
 
-Install ROS 2 Jazzy: https://docs.ros.org/en/jazzy/Installation.html
-
 ```bash
-sudo apt update
-sudo apt install \
-  ros-jazzy-desktop \
-  ros-jazzy-navigation2 ros-jazzy-nav2-bringup \
-  ros-jazzy-slam-toolbox \
-  ros-jazzy-ros-gz-bridge ros-jazzy-ros-gz-sim \
-  ros-jazzy-teleop-twist-keyboard \
-  ros-jazzy-xacro ros-jazzy-tf2-tools \
-  ros-jazzy-robot-localization
-```
-
-#### Python virtual environment (for `trimesh` and other pip-only deps)
-
-Ubuntu 24.04 is PEP 668 protected, so pip-only packages (like `trimesh`) cannot be
-installed into the system Python directly. We use a venv with `--system-site-packages`
-so ROS 2 packages (`rclpy`, etc.) remain importable from inside the venv.
-
-```bash
-# One-time: install the venv module (Ubuntu 24.04 / Python 3.12)
-sudo apt install -y python3.12-venv
-
-# Create the venv (inherits system site-packages so ROS 2 still works)
-python3 -m venv --system-site-packages ~/.venvs/robot
-
-# Install this workspace's Python deps (declared in pyproject.toml)
-~/.venvs/robot/bin/pip install -e ~/ros2_ws/src/Differential_Drive_Mobile_Robot
-```
-
-Activate it before running ROS 2 nodes that need the pip-installed deps:
-
-```bash
-source ~/.venvs/robot/bin/activate
-source /opt/ros/jazzy/setup.bash
-source ~/ros2_ws/install/setup.bash
-```
-
-Verify:
-
-```bash
-python -c "import trimesh, rclpy; print('trimesh', trimesh.__version__, '| rclpy OK')"
-```
-
-#### Source the workspace in every new shell
-
-ROS 2 does not source environments globally — every new terminal needs the ROS 2 distro
-and this workspace's `install/` overlay sourced. Append both lines to your shell rc once:
-
-```bash
-echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
-echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
+cd ~/ros2_ws/src/Differential_Drive_Mobile_Robot
+chmod +x setup_ubuntu.sh && ./setup_ubuntu.sh
 ```
 
 ## 2. Robot description
@@ -161,7 +105,7 @@ evince frames.pdf
 
 
 ## 3. SLAM
-SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal. Source the workspace in every new shell (see [section 1 — Source the workspace](#source-the-workspace-in-every-new-shell)).
+SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal.
 
 ```bash
 # Terminal 1 — launch the mobile robot in Gazebo (10x10 world by default)
@@ -218,7 +162,7 @@ ros2 launch mobile_robot_gazebo no_roof_small_warehouse.launch.py x_pos:=1.5 y_p
 Map the new world by running slam_toolbox the same way as above, then save under `mobile_robot_navigation2/maps/<name>/` so Nav2 can load it via `map_name:=<name>`.
 
 ## 4. Navigation (Nav2 with DWB controller and NavFn planner)
-Nav2 runs against the saved map produced in section 3 — no slam_toolbox needed at navigation time. Source the workspace in every new shell (see [section 1 — Source the workspace](#source-the-workspace-in-every-new-shell)).
+Nav2 runs against the saved map produced in section 3 — no slam_toolbox needed at navigation time.
 
 ### Single robot
 ```bash
@@ -257,7 +201,6 @@ To move to a goal, click **Nav2 Goal** and set the goal location and pose.
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/aee2a359-069e-47e6-b6ca-138fd3075ada" />
 
 ## 5. Controller
-Source the workspace in every new shell (see [section 1 — Source the workspace](#source-the-workspace-in-every-new-shell)).
 
 ### Verify the velocity
 ```bash
