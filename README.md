@@ -1,4 +1,4 @@
-# Differential Drive Mobile Robot
+# Mobile Robot
 
 ![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy-blue?style=flat-square&logo=ros)
 ![Gazebo](https://img.shields.io/badge/Gazebo-Harmonic-orange?style=flat-square)
