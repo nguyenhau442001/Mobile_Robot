@@ -200,83 +200,14 @@ To move to a goal, click **Nav2 Goal** and set the goal location and pose.
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/ca103906-d5ed-46c6-affd-837b079a9dd5" />
 <img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/aee2a359-069e-47e6-b6ca-138fd3075ada" />
 
-## 5. Controller
 
-### Verify the velocity
-```bash
-ros2 run rqt_plot rqt_plot
-ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
-ros2 run mobile_robot_teleop mobile_robot_teleop_key --ros-args -r cmd_vel:=/cmd_vel
-```
-
-Add the two topics below to the plot to check the velocity response when increasing velocity slowly:
-
-`/cmd_vel/linear/x`          => Set Point (SP)
-
-`/odom/twist/twist/linear/x` => Process Variable (PV)
-
-To monitor acceleration, add `/imu/linear_acceleration/x` to rqt_plot.
-
-<img width="1817" height="835" alt="image" src="https://github.com/user-attachments/assets/3ed75f91-36b0-4e06-a09b-962bb9176319" />
-
----------------
-# Case study: The robot should reach 5 m/s within 5 s from standstill, and stop completely within 1 s.
-
-To meet this requirement, a controller was created based on the profile below:
-
-The motion has three distinct phases:
-
-- Acceleration phase (`t_acc`): Velocity increases linearly from 0 → `v_target`.
-- Cruise phase (`t_cruise`):    Velocity stays constant at `v_target`.
-- Deceleration phase (`t_dec`): Velocity decreases smoothly to 0 using a cosine function.
-
-```
-velocity
-   ^
-   |           ┌──────────────┐
-   |          /|              |\
-   |         / |              | \
-   |        /  |              |  \
-   |       /   |              |   \
-   +-----------------------------------> time
-       Accel     Cruise       Decel
-```
-
-ROS Node: Trapezoidal Velocity Controller
------------------------------------------
-This node generates a trapezoidal velocity profile and publishes
-linear velocity commands to the `/cmd_vel` topic.
-
-The profile consists of three phases:
-
-  1. Acceleration phase - linearly increases velocity from 0 to `v_target`
-  2. Cruise phase       - maintains a constant target velocity
-  3. Deceleration phase - smoothly decreases velocity to 0 using a cosine function
-
-Why discretize?
----------------
-Instead of sending the velocity set point (`v_target`) directly to the robot,
-we ramp velocity up and down over time (`dt`). This prevents jerky motion and
-improves robot stability.
-
-
-The `trapezoid_cmd_vel_node` was created to send the desired velocity to the robot.
-
-```bash
-ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
-ros2 launch mobile_robot_teleop trapezoid_profile_controller.launch.py
-```
-
-The robot accelerates from standstill (t = 9) to 5 m/s (t = 14), then decelerates from 5 m/s (t = 14) to 0 m/s (t = 15).
-<img width="1827" height="746" alt="image" src="https://github.com/user-attachments/assets/e92fa2c7-2004-4760-afc4-ae60f8adcf35" />
-
-## 6. Real-Time Factor (RTF)
+## 5. Real-Time Factor (RTF)
 
 The **Real-Time Factor** is the ratio between simulated time and wall-clock time. RTF = 1.0 means the simulation advances at real speed; RTF < 1.0 means the physics step is too expensive for the host to keep up, and RTF > 1.0 means it is running faster than real time. Tracking RTF is the standard way to compare the cost of different physics engines (ODE, TPE, Bullet, DART) or to detect when world complexity has outgrown the host.
 
 The world stats are published on `/world/<world_name>/stats` (`gz.msgs.WorldStatistics`). Two ways to read them, depending on whether you want a quick spot check or a reproducible measurement.
 
-### 7.1 Quick check — `gz topic` one-liner
+### 6.1 Quick check — `gz topic` one-liner
 
 Single-shot inspection of the latest stats message:
 
@@ -302,7 +233,7 @@ gz topic -e -t /world/default/stats \
   | awk '{sum += $2; count++} END {print "Average RTF:", sum/count}'
 ```
 
-### 7.2 Reproducible benchmark — `physic_engines_rtf_measure.py`
+### 6.2 Reproducible benchmark — `physic_engines_rtf_measure.py`
 
 For comparing physics engines or capturing the variance (not just the mean), use the bundled benchmark script. It subscribes to the stats topic for a fixed duration and reports mean, median, stdev, min, and max:
 
@@ -327,7 +258,7 @@ Collecting RTF samples for 60s on /world/default/stats...
 
 **Workflow for comparing physics engines.** Swap the engine in the SDF (`<physics name="..." type="ode|tpe|bullet|dart">`), restart Gazebo, run the script against the same world and duration, and compare medians (more robust than means under jitter).
 
-## 7. Web dashboard
+## 6. Web dashboard
 
 The `mobile_robot_web` package serves a browser-based dashboard that talks to ROS 2 over rosbridge. It renders the map, lidar scan, and robot pose, and exposes goal-setting and teleop — handy when you don't want to start RViz.
 
@@ -350,7 +281,7 @@ ros2 launch mobile_robot_web web_bringup.launch.py http_port:=8080 ws_port:=9091
 
 > **Browser note.** The launch file defaults to Firefox because Chrome on llvmpipe (no-GPU VMs) refuses to enable WebGL. On Chrome, start it with `--enable-unsafe-swiftshader`, or pass `browser:=xdg-open` to use the system default.
 
-## 8. Genesis — batched fleet simulation
+## 7. Genesis — batched fleet simulation
 
 The `mobile_robot_genesis` package contains standalone Genesis scripts that load the same URDF used in Gazebo (via [mobile_robot_genesis/scripts/xacro_loader.py](mobile_robot_genesis/scripts/xacro_loader.py)) and step large fleets in a single batched physics call — useful for fleet-scale RL or task-assignment experiments where launching 100 Gazebo robots is impractical.
 
