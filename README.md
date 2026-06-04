@@ -90,10 +90,8 @@ chmod +x setup_ubuntu.sh && ./setup_ubuntu.sh
   - IMU sensor
   - Lidar sensor (180° forward Field of View, 181 samples at 1° resolution, 5 m range, 5 Hz)
 
-<img width="1824" height="759" alt="image" src="https://github.com/user-attachments/assets/f2a69b68-876a-4dc6-a20b-09cbea5dca7f" />
-<img width="1824" height="759" alt="image" src="https://github.com/user-attachments/assets/bc2bd408-ba4a-40ff-aa22-a653fca2b56f" />
-<img width="1824" height="759" alt="image" src="https://github.com/user-attachments/assets/b5821ce8-12c4-463e-9612-f24e65e3f2ed" />
-<img width="1824" height="759" alt="image" src="https://github.com/user-attachments/assets/b8801daf-88c0-42fd-bf59-0ac4c683639e" />
+<img width="3018" height="1892" alt="image" src="https://github.com/user-attachments/assets/fd8911b9-ba57-4429-86a3-b67e4e172fff" />
+
 
 To view the TF tree, run:
 
