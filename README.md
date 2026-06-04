@@ -97,9 +97,10 @@ To view the TF tree, run:
 
 ```bash
 ros2 run tf2_tools view_frames
-evince frames.pdf
+evince frames_*.pdf # Ubuntu
+open frames_*.pdf   # MacOS
 ```
-<img width="1660" height="355" alt="image" src="https://github.com/user-attachments/assets/f0e7d94b-a6f3-4449-afa0-6563179bcbc4" />
+<img width="2754" height="908" alt="image" src="https://github.com/user-attachments/assets/0bcd37cf-cb8d-4752-9c2d-6b183407cc4a" />
 
 
 ## 3. SLAM
