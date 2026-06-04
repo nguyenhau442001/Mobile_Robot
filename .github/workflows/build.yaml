@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [jazzy]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   ubuntu:
     name: Ubuntu 24.04 / ROS2 Jazzy
