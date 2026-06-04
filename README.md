@@ -27,7 +27,7 @@ fleet of 100 robots navigating in parallel.
 | Autonomous mapping | slam_toolbox (online async) |
 | Autonomous navigation | Nav2 — AMCL, NavFn planner, DWB controller |
 | Multi-robot | N robots sharing one map, independent Nav2 stacks |
-| Teleoperation | Keyboard node + trapezoidal velocity profile controller |
+| Teleoperation | Keyboard node controller |
 | Web dashboard | rosbridge + roslibjs / ros2djs / ros3djs — map, LiDAR, teleop in the browser |
 | Fleet simulation | Genesis (Apple Metal / CUDA) — 100+ robots, batched physics, task-assignment fleet manager |
 | Benchmarking | RTF measurement across physics engines, real-time factor analysis |
@@ -47,8 +47,6 @@ fleet of 100 robots navigating in parallel.
 
 ## Highlights
 
-- **Trapezoidal velocity controller** — 0 → 5 m/s in 5 s, full stop in 1 s,
-  verified against IMU and odometry via rqt_plot
 - **AWS small-warehouse world** — SLAM + Nav2 tested in a realistic
   warehouse layout, not just an empty box
 - **Genesis fleet manager** — 100 differential-drive robots in a single
