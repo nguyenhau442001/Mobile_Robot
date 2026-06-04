@@ -1,14 +1,15 @@
+import os
 import platform
+
+from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
-from launch.substitutions import LaunchConfiguration, Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import Command, LaunchConfiguration
+
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
-from ament_index_python.packages import get_package_share_directory
-
-import os
 
 
 def checkPlatform():
@@ -99,7 +100,8 @@ def generate_launch_description():
         output='screen'
     )
 
-    gz_sim_launch = os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
+    gz_sim_launch = os.path.join(
+        get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
 
     if checkPlatform() == 'macos':
         gz_server = IncludeLaunchDescription(
@@ -142,5 +144,3 @@ def generate_launch_description():
             ros_gz_bridge,
             joint_state_bridge,
         ])
-
-
