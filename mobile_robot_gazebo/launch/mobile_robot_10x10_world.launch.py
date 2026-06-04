@@ -1,3 +1,5 @@
+import platform
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.substitutions import LaunchConfiguration, Command
@@ -7,6 +9,16 @@ from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 import os
+
+
+def checkPlatform():
+    system = platform.system()
+    if system == 'Darwin':
+        return 'macos'
+    elif system == 'Linux':
+        return 'ubuntu'
+    else:
+        raise RuntimeError(f'Unsupported platform: {system}')
 
 
 def generate_launch_description():
@@ -27,19 +39,6 @@ def generate_launch_description():
     robot_description = ParameterValue(
         Command(['xacro ', xacro_file]),
         value_type=str
-    )
-
-    gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('ros_gz_sim'),
-                'launch',
-                'gz_sim.launch.py'
-            )
-        ),
-        # -r  = start running immediately (not paused)
-        # without -r, UserCommands system may not advertise /world/default/create
-        launch_arguments={'gz_args': '-r ' + world_file}.items()
     )
 
     state_pub = Node(
@@ -100,16 +99,48 @@ def generate_launch_description():
         output='screen'
     )
 
-    return LaunchDescription([
-        # Force EGL to use X11 platform so the sensor render thread can use
-        # llvmpipe (software OpenGL) via GLX instead of failing on EGL device mode
-        SetEnvironmentVariable('EGL_PLATFORM', 'x11'),
-        declare_x,
-        declare_y,
-        declare_z,
-        gz_sim,
-        state_pub,
-        spawn_robot,
-        ros_gz_bridge,
-        joint_state_bridge,
-    ])
+    gz_sim_launch = os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
+
+    if checkPlatform() == 'macos':
+        gz_server = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(gz_sim_launch),
+            launch_arguments={'gz_args': '-s -r ' + world_file}.items()
+        )
+
+        gz_gui = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(gz_sim_launch),
+            launch_arguments={'gz_args': '-g'}.items()
+        )
+
+        return LaunchDescription([
+            declare_x,
+            declare_y,
+            declare_z,
+            gz_server,
+            gz_gui,
+            state_pub,
+            spawn_robot,
+            ros_gz_bridge,
+            joint_state_bridge,
+        ])
+    else:
+        gz_sim = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(gz_sim_launch),
+            launch_arguments={'gz_args': '-r ' + world_file}.items()
+        )
+
+        return LaunchDescription([
+            # Force EGL to use X11 platform so the sensor render thread can use
+            # llvmpipe (software OpenGL) via GLX instead of failing on EGL device mode
+            SetEnvironmentVariable('EGL_PLATFORM', 'x11'),
+            declare_x,
+            declare_y,
+            declare_z,
+            gz_sim,
+            state_pub,
+            spawn_robot,
+            ros_gz_bridge,
+            joint_state_bridge,
+        ])
+
+
