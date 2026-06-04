@@ -290,3 +290,10 @@ python3 mobile_robot_genesis/scripts/genesis_mobile_robot_fleet.py
 ```
 
 Each script runs until the viewer window is closed. The xacro loader resolves `$(find <pkg>)` substitutions without needing the ROS environment sourced, so these scripts work from a plain Python venv as long as `genesis-world` and `xacro` are installed (both pulled in by `pip install -e .` against [pyproject.toml](pyproject.toml)).
+
+## References
+
+- [ROS 2 — Python testing tutorial](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Testing/Python.html)
+- [colcon — how-to: run tests](https://colcon.readthedocs.io/en/released/user/how-to.html)
+- [pytest — exit codes](https://docs.pytest.org/en/stable/reference/exit-codes.html)
+- [rosdep — package manager](https://wiki.ros.org/rosdep)
