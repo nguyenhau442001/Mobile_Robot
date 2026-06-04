@@ -14,7 +14,6 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
     ],
     install_requires=['setuptools'],
-    tests_require=['pytest'],
     zip_safe=True,
     maintainer='Nguyen Ngoc Hau',
     maintainer_email='nguyenhau442001@gmail.com',
