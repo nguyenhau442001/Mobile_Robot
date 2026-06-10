@@ -22,24 +22,33 @@ fleet of 100 robots navigating in parallel.
 
 | Capability | Stack |
 |---|---|
-| Robot modelling | URDF / xacro, IMU, 2D LiDAR |
-| Physics simulation | Gazebo Sim Harmonic (ODE / TPE / Bullet / DART), Mujoco, Genesis |
+| Robot modelling | URDF / xacro, IMU, 2D LiDAR, interactive dimensions editor |
+| Physics simulation | Gazebo Sim Harmonic (ODE / TPE / Bullet / DART), MuJoCo, Genesis |
 | Autonomous mapping | slam_toolbox (online async) |
 | Autonomous navigation | Nav2 — AMCL, NavFn planner, DWB controller |
+| Custom navigation | Hand-written go-to-goal action server (no Nav2) |
+| Motion control | Proportional controller · Cascaded P(pos)→P(vel) controller |
 | Multi-robot | N robots sharing one map, independent Nav2 stacks |
-| Teleoperation | Keyboard node controller |
+| Teleoperation | Keyboard teleop (incremental) · Trapezoidal velocity profiler |
+| Velocity monitoring | Real-time cmd_vel vs odom plotter (PyQtGraph) |
 | Web dashboard | rosbridge + roslibjs / ros2djs / ros3djs — map, LiDAR, teleop in the browser |
 | Fleet simulation | Genesis (Apple Metal / CUDA) — 100+ robots, batched physics, task-assignment fleet manager |
 | Benchmarking | RTF measurement across physics engines, real-time factor analysis |
 
 ---
 
-- **mobile_robot_description** → Robot geometry and physical description (URDF/xacro).
-- **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo (10x10 and AWS small-warehouse worlds) and bridging topics.
+## Packages
+
+- **mobile_robot_description** → Robot geometry and physical description (URDF/xacro). Includes a PyQt5 GUI editor (`robot_dimensions_config_editor`) for live-editing robot dimensions.
+- **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo (10×10 and AWS small-warehouse worlds) and bridging topics.
 - **mobile_robot_slam** → slam_toolbox bring-up (online async) + RViz for mapping.
 - **mobile_robot_navigation2** → Nav2 bring-up against a saved map (AMCL, DWB controller, NavFn planner).
+- **mobile_robot_custom_nav** → Custom go-to-goal action server/client and RViz goal bridge. Nav2-free alternative — drives the robot to a (x, y, yaw) pose using the cascaded controller.
+- **mobile_robot_interfaces** → Custom ROS 2 interfaces: `GoToGoal.action` (used by `mobile_robot_custom_nav`).
+- **mobile_robot_control** → Interchangeable velocity controllers (Proportional, Cascaded), incremental keyboard teleop node, shared math utilities (`yaw_from_quaternion`, `normalize_angle`, `clamp`), and unit/integration tests.
 - **mobile_robot_multi** → Multi-robot Gazebo + Nav2 bring-up (N robots in one world).
 - **mobile_robot_teleop** → Python nodes for teleoperation (keyboard control, trapezoidal velocity controller).
+- **mobile_robot_monitor** → Real-time velocity monitor: plots cmd_vel setpoint vs odom actual in a rolling 10-second window (PyQtGraph + PyQt5).
 - **mobile_robot_web** → Browser dashboard via rosbridge + roslibjs / ros2djs / ros3djs (map, lidar scan, pose, goal, teleop).
 - **mobile_robot_genesis** → Genesis physics scripts for batched fleet simulation (100+ robots in parallel envs, fleet manager with task assignment).
 - **mobile_robot_mujoco** → Standalone MuJoCo / Gymnasium scratch scripts.
@@ -56,6 +65,10 @@ fleet of 100 robots navigating in parallel.
   no RViz needed; same-origin HTTP server eliminates CORS issues
 - **Physics engine benchmarking** — reproducible RTF measurement script
   to compare ODE vs TPE vs Bullet vs DART on the same world
+- **Custom navigation stack** — hand-written go-to-goal action server with
+  a cascaded P(position)→P(velocity) controller as an alternative to Nav2
+- **Interchangeable controllers** — swap between Proportional and Cascaded
+  controllers at launch time without changing the navigation code
 
 ## 1. Environment Setup
 
@@ -69,7 +82,7 @@ git clone -b jazzy https://github.com/nguyenhau442001/Differential_Drive_Mobile_
 ### macOS (Tahoe)
 
 ```bash
-cd ~/ros2_ws/src/Differential_Drive_Mobile_Robot
+cd ~/ros2_ws/src/Mobile_Robot
 chmod +x setup_macos.sh && ./setup_macos.sh
 ```
 
@@ -78,7 +91,7 @@ chmod +x setup_macos.sh && ./setup_macos.sh
 ### Ubuntu 24.04
 
 ```bash
-cd ~/ros2_ws/src/Differential_Drive_Mobile_Robot
+cd ~/ros2_ws/src/Mobile_Robot
 chmod +x setup_ubuntu.sh && ./setup_ubuntu.sh
 ```
 
@@ -100,6 +113,15 @@ open frames_*.pdf   # MacOS
 ```
 <img width="2754" height="908" alt="image" src="https://github.com/user-attachments/assets/0bcd37cf-cb8d-4752-9c2d-6b183407cc4a" />
 
+### Robot dimensions config editor
+
+An interactive PyQt5 GUI lets you edit robot link dimensions (chassis, wheels, IMU, LiDAR) and save them back to `robot_dimensions_config.yaml` without touching YAML by hand:
+
+```bash
+ros2 run mobile_robot_description robot_dimensions_config_editor
+```
+
+The editor patches only the changed lines, preserving all comments and whitespace in the file.
 
 ## 3. SLAM
 SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal.
@@ -137,7 +159,7 @@ CTRL-C to quit
 
 ```bash
 # Terminal 4 — save the map (writes map.yaml + map.pgm into mobile_robot_navigation2/maps/10x10/)
-ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/Differential_Drive_Mobile_Robot/mobile_robot_navigation2/maps/10x10/map
+ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/Mobile_Robot/mobile_robot_navigation2/maps/10x10/map
 ```
 
 > The slam_toolbox params used here live in [mobile_robot_slam/param/slam_toolbox.yaml](mobile_robot_slam/param/slam_toolbox.yaml) (frames set to `chassis`/`odom`/`map`, scan topic `/scan`, sim time on). Override with `slam_params_file:=<path>` or `use_sim_time:=false` if needed.
@@ -192,8 +214,55 @@ Each robot's stack runs under `/<robot>/...` with frames `<robot>/chassis`, `<ro
 In RViz, click **2D Pose Estimate** and set the initial pose of the robot.
 To move to a goal, click **Nav2 Goal** and set the goal location and pose.
 
+## 5. Custom Navigation (go-to-goal, no Nav2)
 
-## 5. Real-Time Factor (RTF)
+`mobile_robot_custom_nav` provides a lightweight alternative to Nav2: a hand-written action server that drives the robot to a `(x, y, yaw)` target using a two-phase cascaded control loop.
+
+**Phase 1** — rotate toward the goal, then drive forward until within `goal_tolerance` (default 0.10 m).  
+**Phase 2** — spin in place until within `heading_tolerance` (default 10°) of the target yaw.
+
+Velocity commands come from `mobile_robot_control`'s **CascadedController** (outer position loop + inner velocity loop with asymmetric accel/decel limits).
+
+```bash
+# Terminal 1 — Gazebo
+ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
+
+# Terminal 2 — go-to-goal action server
+ros2 run mobile_robot_custom_nav go_to_goal_server
+
+# Terminal 3a — send a goal from the CLI
+ros2 run mobile_robot_custom_nav go_to_goal_client 3.0 2.0        # x=3, y=2, yaw=0
+ros2 run mobile_robot_custom_nav go_to_goal_client 3.0 2.0 1.57   # with target yaw
+
+# Terminal 3b — or drop a goal in RViz with the "2D Goal Pose" tool
+ros2 run mobile_robot_custom_nav goal_bridge_node
+```
+
+### Motion controllers
+
+`mobile_robot_control` ships two interchangeable controllers, both implementing the same `RobotController` base interface so the go-to-goal server is unaware of which one is active:
+
+| Controller | Description |
+|---|---|
+| `ProportionalController` | P control with asymmetric accel/decel rate limiting |
+| `CascadedController` | Outer P(position) → inner P(velocity) loop with rate limiting; requires odometry feedback via `update_feedback()` |
+
+Controller gains, velocity caps, and acceleration limits are tuned in YAML and loaded at runtime:
+
+```
+mobile_robot_control/config/proportional_controller_params.yaml
+mobile_robot_control/config/cascaded_controller_params.yaml
+```
+
+### Velocity monitor
+
+`mobile_robot_monitor` opens a live PyQtGraph window that plots the cmd_vel setpoint against the actual odom velocity over a rolling 10-second window — useful for tuning controller gains:
+
+```bash
+ros2 run mobile_robot_monitor velocity_plotter
+```
+
+## 6. Real-Time Factor (RTF)
 
 The **Real-Time Factor** is the ratio between simulated time and wall-clock time. RTF = 1.0 means the simulation advances at real speed; RTF < 1.0 means the physics step is too expensive for the host to keep up, and RTF > 1.0 means it is running faster than real time. Tracking RTF is the standard way to compare the cost of different physics engines (ODE, TPE, Bullet, DART) or to detect when world complexity has outgrown the host.
 
@@ -250,7 +319,7 @@ Collecting RTF samples for 60s on /world/default/stats...
 
 **Workflow for comparing physics engines.** Swap the engine in the SDF (`<physics name="..." type="ode|tpe|bullet|dart">`), restart Gazebo, run the script against the same world and duration, and compare medians (more robust than means under jitter).
 
-## 6. Web dashboard
+## 7. Web dashboard
 
 The `mobile_robot_web` package serves a browser-based dashboard that talks to ROS 2 over rosbridge. It renders the map, lidar scan, and robot pose, and exposes goal-setting and teleop — handy when you don't want to start RViz.
 
@@ -273,7 +342,7 @@ ros2 launch mobile_robot_web web_bringup.launch.py http_port:=8080 ws_port:=9091
 
 > **Browser note.** The launch file defaults to Firefox because Chrome on llvmpipe (no-GPU VMs) refuses to enable WebGL. On Chrome, start it with `--enable-unsafe-swiftshader`, or pass `browser:=xdg-open` to use the system default.
 
-## 7. Genesis — batched fleet simulation
+## 8. Genesis — batched fleet simulation
 
 The `mobile_robot_genesis` package contains standalone Genesis scripts that load the same URDF used in Gazebo (via [mobile_robot_genesis/scripts/xacro_loader.py](mobile_robot_genesis/scripts/xacro_loader.py)) and step large fleets in a single batched physics call — useful for fleet-scale RL or task-assignment experiments where launching 100 Gazebo robots is impractical.
 
