@@ -1,14 +1,11 @@
-# ──────────────────────────────────────────────────────────────────────────────
 # GoToGoal action server — loop-level parameters
-# ──────────────────────────────────────────────────────────────────────────────
 #
-#  These parameters control the two-phase navigation loop itself and are
-#  independent of which velocity controller is used. Controller-specific
-#  tuning (gains, velocity caps) lives in the controller's own config file
-#  (e.g. mobile_robot_control/config/proportional_controller_params.yaml).
-#
-# ──────────────────────────────────────────────────────────────────────────────
+# These parameters control the two-phase navigation loop itself and are
+# independent of which velocity controller is used. Controller-specific
+# tuning (gains, velocity caps) lives in the controller's own config file
+# (e.g. mobile_robot_control/config/proportional_controller_params.yaml).
 
+---
 go_to_goal_server:
   ros__parameters:
 
@@ -16,5 +13,5 @@ go_to_goal_server:
     control_frequency: 20.0
 
     # Tolerances
-    goal_tolerance:     0.10       # arrival radius [m]
-    heading_tolerance:  0.1745329  # 10° in rad; turn in place above this error
+    goal_tolerance: 0.10  # arrival radius [m]
+    heading_tolerance: 0.1745329  # 10 deg in rad; turn in place above this

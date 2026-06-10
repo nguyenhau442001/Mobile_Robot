@@ -1,27 +1,28 @@
+---
 base_link:
-  base_length: 0.4  #meter
-  base_width:  0.3  #meter
-  base_height: 0.1  #meter
-  base_mass:   1.0  #kg
+  base_length: 0.4  # meter
+  base_width: 0.3  # meter
+  base_height: 0.1  # meter
+  base_mass: 1.0  # kg
 
 imu_link:
-  imu_length: 0.0155  #meter
-  imu_width:  0.0150  #meter
-  imu_height: 0.0025  #meter
-  imu_mass:   0.001   #kg
+  imu_length: 0.0155  # meter
+  imu_width: 0.0150  # meter
+  imu_height: 0.0025  # meter
+  imu_mass: 0.001  # kg
 
 lidar_link:
-  lidar_radius:   0.038  #meter
-  lidar_length:   0.041  #meter
-  lidar_x_offset: 0.030  #meter  (clearance between lidar edge and base front edge)
-  lidar_mass:     0.170  #kg
+  lidar_radius: 0.038  # meter
+  lidar_length: 0.041  # meter
+  lidar_x_offset: 0.030  # meter (clearance: lidar edge to base front edge)
+  lidar_mass: 0.170  # kg
 
 driven_wheel:
-  driven_wheel_radius: 0.065  #meter
-  driven_wheel_length: 0.025  #meter
-  driven_wheel_mass:   0.1    #kg
+  driven_wheel_radius: 0.065  # meter
+  driven_wheel_length: 0.025  # meter
+  driven_wheel_mass: 0.1  # kg
 
 caster_wheel:
-  caster_wheel_radius:   0.035  #meter
-  caster_wheel_x_offset: 0.040  #meter
-  caster_wheel_mass:     0.1    #kg
+  caster_wheel_radius: 0.035  # meter
+  caster_wheel_x_offset: 0.040  # meter
+  caster_wheel_mass: 0.1  # kg
