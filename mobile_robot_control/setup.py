@@ -1,5 +1,8 @@
+"""Setup for the mobile_robot_control package."""
 from glob import glob
-from setuptools import find_packages, setup
+
+from setuptools import find_packages
+from setuptools import setup
 
 package_name = 'mobile_robot_control'
 
@@ -9,7 +12,10 @@ setup(
     packages=find_packages(exclude=['test']),
     py_modules=['math_utils'],
     data_files=[
-        ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
+        (
+            'share/ament_index/resource_index/packages',
+            ['resource/' + package_name],
+        ),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.py')),
         ('share/' + package_name + '/config', glob('config/*.yaml')),

@@ -1,5 +1,6 @@
-from glob import glob
-from setuptools import find_packages, setup
+"""Setup for the mobile_robot_monitor package."""
+from setuptools import find_packages
+from setuptools import setup
 
 package_name = 'mobile_robot_monitor'
 
@@ -8,7 +9,10 @@ setup(
     version='1.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
-        ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
+        (
+            'share/ament_index/resource_index/packages',
+            ['resource/' + package_name],
+        ),
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools', 'pyqtgraph>=0.13', 'PyQt5>=5.15'],
