@@ -12,6 +12,7 @@
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>std_msgs</depend>
   <depend>mobile_robot_interfaces</depend>
   <depend>mobile_robot_control</depend>
 

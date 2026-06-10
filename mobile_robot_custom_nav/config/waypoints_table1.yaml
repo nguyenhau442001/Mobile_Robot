@@ -1,0 +1,13 @@
+---
+# Waypoints for delivery to Table 1.
+# Each stop: x [m], y [m], th [deg] (final heading at that stop).
+# Sequence: pickup -> table -> home (return stop).
+waypoints:
+  - point:
+      x: 4.0
+      y: 2.0
+      th: 45   # pickup station
+  - point:
+      x: 2.0
+      y: 2.0
+      th: 90   # return home

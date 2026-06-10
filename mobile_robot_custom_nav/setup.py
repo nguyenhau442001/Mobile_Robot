@@ -15,6 +15,7 @@ setup(
         'go_to_goal_server',
         'go_to_goal_client',
         'goal_bridge_node',
+        'waypoint_follower_node',
     ],
     data_files=[
         (
@@ -43,6 +44,7 @@ setup(
             'go_to_goal_server = go_to_goal_server:main',
             'go_to_goal_client = go_to_goal_client:main',
             'goal_bridge_node = goal_bridge_node:main',
+            'waypoint_follower_node = waypoint_follower_node:main',
         ],
     },
 )

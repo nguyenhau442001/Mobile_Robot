@@ -1,0 +1,10 @@
+---
+waypoints:
+  - point:
+      x: 9.0
+      y: 18.0
+      th: 0    # pickup station
+  - point:
+      x: 2.0
+      y: 2.0
+      th: 90   # return home
