@@ -123,7 +123,101 @@ ros2 run mobile_robot_description robot_dimensions_config_editor
 
 The editor patches only the changed lines, preserving all comments and whitespace in the file.
 
-## 3. SLAM
+## 3. Kinematics
+
+### 3.1 Differential drive model
+
+A differential drive robot steers by varying the speed of its two wheels. At any instant the motion is locally linear, so the forward velocity of the robot's centre is simply the mean of the two wheel velocities:
+
+```
+v = (v_r + v_l) / 2
+```
+
+where `v_l` and `v_r` are the left and right wheel linear velocities.
+
+The angular velocity about the robot's vertical axis is:
+
+```
+ω = (v_r - v_l) / L
+```
+
+where `L` is the wheel-to-wheel track width (distance between the two contact points).
+
+Projecting `v` onto the world x–y plane and integrating gives the body velocity equations:
+
+```
+ẋ   = v · cos(θ)
+ẏ   = v · sin(θ)
+θ̇   = ω
+```
+
+In matrix form:
+
+```
+[ ẋ  ]   [ cos(θ)   0 ] [ v ]
+[ ẏ  ] = [ sin(θ)   0 ] [ ω ]
+[ θ̇  ]   [   0      1 ]
+```
+
+Inverting to find wheel speeds from a desired `(v, ω)` command (what `/cmd_vel` carries):
+
+```
+v_r = v + ω · L/2
+v_l = v - ω · L/2
+```
+
+### 3.2 Dead reckoning (odometry)
+
+Dead reckoning integrates the kinematic model forward in time to estimate the robot's pose without external sensing. At each timestep `Δt`:
+
+```
+Δs    = (Δs_r + Δs_l) / 2          # distance travelled by centre
+Δθ    = (Δs_r - Δs_l) / L          # heading change
+
+x(t+1)  = x(t) + Δs · cos(θ(t) + Δθ/2)
+y(t+1)  = y(t) + Δs · sin(θ(t) + Δθ/2)
+θ(t+1)  = θ(t) + Δθ
+```
+
+Using the heading at the midpoint `θ + Δθ/2` (midpoint integration) reduces linearisation error compared to using the heading at the start of the step.
+
+### 3.3 Wheel encoders
+
+Wheel displacements `Δs_l` and `Δs_r` are derived from incremental encoder ticks:
+
+```
+Δs = (ticks / ticks_per_rev) · 2π · r_wheel
+```
+
+where:
+- `ticks` — encoder pulses counted since the last update
+- `ticks_per_rev` — pulses per full wheel revolution (encoder resolution × gear ratio)
+- `r_wheel` — wheel radius
+
+For example, with a 4000 pulse/rev encoder and a 1:3 gear reduction the wheel completes one revolution every 4000 × 3 = 12 000 pulses, so each tick advances the wheel by `2π · r_wheel / 12000` metres.
+
+### 3.4 ROS 2 topic architecture
+
+The firmware running on the motor controller board publishes and subscribes to these topics over a serial bridge:
+
+**Published by the embedded controller:**
+
+| Topic | Type | Notes |
+|---|---|---|
+| `/odom` | `nav_msgs/Odometry` | Dead-reckoning pose + twist |
+| `/imu` | `sensor_msgs/Imu` | Raw IMU readings |
+| `/joint_states` | `sensor_msgs/JointState` | Wheel joint angles |
+| `/tf` | `tf2_msgs/TFMessage` | `odom → base_link` transform |
+
+**Subscribed by the embedded controller:**
+
+| Topic | Type | Notes |
+|---|---|---|
+| `/cmd_vel` | `geometry_msgs/Twist` | Linear `x` + angular `z` velocity command |
+
+The velocity command from Nav2 (or from `mobile_robot_control`'s go-to-goal server) is discrete: it is recomputed every control cycle `Δt`. Because `Δt` is small (typically 50 ms), the piecewise-constant command approximates a continuous signal well enough for smooth motion.
+
+## 4. SLAM
 SLAM uses **slam_toolbox** (online async mode). The `mobile_robot_slam` launch file embeds slam_toolbox + RViz, so the whole mapping session needs only two terminals (Gazebo + SLAM) plus a teleop terminal.
 
 ```bash
@@ -179,7 +273,7 @@ ros2 launch mobile_robot_gazebo no_roof_small_warehouse.launch.py x_pos:=1.5 y_p
 ```
 Map the new world by running slam_toolbox the same way as above, then save under `mobile_robot_navigation2/maps/<name>/` so Nav2 can load it via `map_name:=<name>`.
 
-## 4. Navigation (Nav2 with DWB controller and NavFn planner)
+## 5. Navigation (Nav2 with DWB controller and NavFn planner)
 Nav2 runs against the saved map produced in section 3 — no slam_toolbox needed at navigation time.
 
 ### Single robot
@@ -214,7 +308,7 @@ Each robot's stack runs under `/<robot>/...` with frames `<robot>/chassis`, `<ro
 In RViz, click **2D Pose Estimate** and set the initial pose of the robot.
 To move to a goal, click **Nav2 Goal** and set the goal location and pose.
 
-## 5. Custom Navigation (go-to-goal, no Nav2)
+## 6. Custom Navigation (go-to-goal, no Nav2)
 
 `mobile_robot_custom_nav` provides a lightweight alternative to Nav2: a hand-written action server that drives the robot to a `(x, y, yaw)` target using a two-phase cascaded control loop.
 
@@ -262,13 +356,13 @@ mobile_robot_control/config/cascaded_controller_params.yaml
 ros2 run mobile_robot_monitor velocity_plotter
 ```
 
-## 6. Real-Time Factor (RTF)
+## 7. Real-Time Factor (RTF)
 
 The **Real-Time Factor** is the ratio between simulated time and wall-clock time. RTF = 1.0 means the simulation advances at real speed; RTF < 1.0 means the physics step is too expensive for the host to keep up, and RTF > 1.0 means it is running faster than real time. Tracking RTF is the standard way to compare the cost of different physics engines (ODE, TPE, Bullet, DART) or to detect when world complexity has outgrown the host.
 
 The world stats are published on `/world/<world_name>/stats` (`gz.msgs.WorldStatistics`). Two ways to read them, depending on whether you want a quick spot check or a reproducible measurement.
 
-### 6.1 Quick check — `gz topic` one-liner
+### 7.1 Quick check — `gz topic` one-liner
 
 Single-shot inspection of the latest stats message:
 
@@ -294,7 +388,7 @@ gz topic -e -t /world/default/stats \
   | awk '{sum += $2; count++} END {print "Average RTF:", sum/count}'
 ```
 
-### 6.2 Reproducible benchmark — `physic_engines_rtf_measure.py`
+### 7.2 Reproducible benchmark — `physic_engines_rtf_measure.py`
 
 For comparing physics engines or capturing the variance (not just the mean), use the bundled benchmark script. It subscribes to the stats topic for a fixed duration and reports mean, median, stdev, min, and max:
 
@@ -319,7 +413,7 @@ Collecting RTF samples for 60s on /world/default/stats...
 
 **Workflow for comparing physics engines.** Swap the engine in the SDF (`<physics name="..." type="ode|tpe|bullet|dart">`), restart Gazebo, run the script against the same world and duration, and compare medians (more robust than means under jitter).
 
-## 7. Web dashboard
+## 8. Web dashboard
 
 The `mobile_robot_web` package serves a browser-based dashboard that talks to ROS 2 over rosbridge. It renders the map, lidar scan, and robot pose, and exposes goal-setting and teleop — handy when you don't want to start RViz.
 
@@ -342,7 +436,7 @@ ros2 launch mobile_robot_web web_bringup.launch.py http_port:=8080 ws_port:=9091
 
 > **Browser note.** The launch file defaults to Firefox because Chrome on llvmpipe (no-GPU VMs) refuses to enable WebGL. On Chrome, start it with `--enable-unsafe-swiftshader`, or pass `browser:=xdg-open` to use the system default.
 
-## 8. Genesis — batched fleet simulation
+## 9. Genesis — batched fleet simulation
 
 The `mobile_robot_genesis` package contains standalone Genesis scripts that load the same URDF used in Gazebo (via [mobile_robot_genesis/scripts/xacro_loader.py](mobile_robot_genesis/scripts/xacro_loader.py)) and step large fleets in a single batched physics call — useful for fleet-scale RL or task-assignment experiments where launching 100 Gazebo robots is impractical.
 
