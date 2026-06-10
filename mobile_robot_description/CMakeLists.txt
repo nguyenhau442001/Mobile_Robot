@@ -13,7 +13,7 @@ find_package(xacro REQUIRED)
 
 # Install resource directories
 install(
-  DIRECTORY meshes urdf scripts
+  DIRECTORY meshes urdf scripts config
   DESTINATION share/${PROJECT_NAME}
 )
 

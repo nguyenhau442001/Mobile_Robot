@@ -1,0 +1,13 @@
+# GoToGoal.action
+# Drive the robot to a target pose ("go to goal").
+
+#--- Goal ---
+geometry_msgs/PoseStamped pose          # target pose to reach
+---
+#--- Result ---
+bool success                            # true if the goal was reached
+geometry_msgs/PoseStamped final_pose    # actual pose at the end of the action
+---
+#--- Feedback ---
+geometry_msgs/PoseStamped current_pose  # robot's current pose
+float32 distance_remaining              # straight-line distance to the goal [m]

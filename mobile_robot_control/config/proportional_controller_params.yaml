@@ -1,0 +1,36 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# ProportionalController tuning — gains, velocity caps, and acceleration limits
+# ──────────────────────────────────────────────────────────────────────────────
+#
+#  Each tick the P output is computed then rate-limited:
+#    target     = clamp(gain * error, max_velocity)
+#    command    = rate_limit(target, prev_command, dt, accel, decel)
+#
+#  Robot geometry (same as teleop_params.yaml):
+#    Wheel radius r = 0.065 m,  base width L = 0.300 m
+#    v_max = 5.0 m/s   →   ω_max = 2 × v_max / L = 33.33 rad/s
+#
+#  Acceleration limits (same derivation as teleop_params.yaml):
+#    Linear  accel:  0 → 5 m/s in 5 s  →  +1.0  m/s²
+#    Linear  decel:  5 → 0 m/s in 1 s  →  -5.0  m/s²
+#    Angular accel:  scaled by 2/L  →   +2 × 1.0 / 0.3  =  +6.67  rad/s²
+#    Angular decel:  scaled by 2/L  →   -2 × 5.0 / 0.3  = -33.33  rad/s²
+#
+# ──────────────────────────────────────────────────────────────────────────────
+
+proportional_controller:
+  ros__parameters:
+
+    # Proportional gains
+    k_linear:   0.5    # gain on distance error      → linear.x
+    k_angular:  2.0    # gain on heading error        → angular.z
+
+    # Velocity caps [m/s] / [rad/s]  (symmetric, applied as ±limit)
+    max_linear_velocity:   5.0     # forward speed cap
+    max_angular_velocity:  33.33   # turn rate cap (kinematic limit)
+
+    # Acceleration limits (asymmetric: gentle ramp-up, aggressive braking)
+    max_linear_acceleration:   1.0     # m/s²   (0 → 5 m/s in 5 s)
+    min_linear_deceleration:  -5.0     # m/s²   (5 → 0 m/s in 1 s)
+    max_angular_acceleration:  6.67    # rad/s²  (+2 × 1.0 / 0.3)
+    min_angular_deceleration: -33.33   # rad/s²  (-2 × 5.0 / 0.3)

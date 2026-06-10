@@ -1,0 +1,49 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Velocity & acceleration limits — derived from robot geometry + requirements
+# ──────────────────────────────────────────────────────────────────────────────
+#
+#  Robot geometry
+#  ──────────────
+#    Wheel radius   r = 0.065 m
+#    Wheel base     L = 0.300 m   (base_width, driven-wheel centre to centre)
+#
+#  Linear velocity  (assignment: reach 5 m/s from standstill)
+#  ────────────────
+#    v_max = 5.0 m/s   →   ω_wheel = v_max / r = 5.0 / 0.065 = 76.92 rad/s (735 RPM)
+#
+#  Angular velocity  (differential-drive kinematic limit)
+#  ─────────────────
+#    ω_max = 2 × v_max / L = 2 × 5.0 / 0.3 = 33.33 rad/s
+#
+#  Acceleration  (assignment requirements)
+#  ────────────
+#    Linear acceleration :  0 → 5 m/s in 5 s  →   a = +5.0 / 5  =  +1.0  m/s²
+#    Linear deceleration :  5 → 0 m/s in 1 s  →   a = -5.0 / 1  =  -5.0  m/s²
+#
+#    Angular acceleration :  scaled by 2/L from linear  →  +2 × 1.0 / 0.3  =  +6.67  rad/s²
+#    Angular deceleration :  scaled by 2/L from linear  →  -2 × 5.0 / 0.3  = -33.33  rad/s²
+#
+# ──────────────────────────────────────────────────────────────────────────────
+
+teleop_node:
+  ros__parameters:
+
+    # Linear velocity  [m/s]
+    max_linear_velocity:   5.0    # forward  (+)
+    min_linear_velocity:  -5.0    # backward (-)
+
+    # Angular velocity  [rad/s]
+    max_angular_velocity:  33.33  # CCW (+)
+    min_angular_velocity: -33.33  # CW  (-)
+
+    # Linear acceleration  [m/s²]
+    max_linear_acceleration:  1.0   # 0 → 5 m/s in 5 s
+    min_linear_deceleration: -5.0   # 5 → 0 m/s in 1 s
+
+    # Angular acceleration  [rad/s²]
+    max_angular_acceleration:  6.67   # +2 × 1.0 / 0.3
+    min_angular_deceleration: -33.33  # -2 × 5.0 / 0.3
+
+    # Teleop step sizes (per keypress)
+    linear_step:  0.05   # m/s
+    angular_step: 0.1    # rad/s
