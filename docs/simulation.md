@@ -1,5 +1,12 @@
 # Simulation
 
+```zsh
+# Terminal 1 — ROS 2 nodes + Gazebo server
+ros2 launch mobile_robot_gazebo mobile_robot_10x10_world.launch.py
+```
+
+<img width="3004" height="1892" alt="image" src="https://github.com/user-attachments/assets/52f0e387-23e4-4724-b75f-b2069820d517" />
+
 ## Real-Time Factor (RTF)
 
 The **Real-Time Factor** is the ratio between simulated time and wall-clock time. RTF = 1.0 means the simulation advances at real speed; RTF < 1.0 means the physics step is too expensive for the host to keep up, and RTF > 1.0 means it is running faster than real time. Tracking RTF is the standard way to compare the cost of different physics engines (ODE, TPE, Bullet, DART) or to detect when world complexity has outgrown the host.
