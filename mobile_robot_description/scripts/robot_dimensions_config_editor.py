@@ -31,6 +31,7 @@ from ruamel.yaml import YAML
 CONFIG_PATH = (
     Path(get_package_share_directory('mobile_robot_description'))
     / 'config'
+    / 'yuhou'
     / 'robot_dimensions_config.yaml'
 )
 

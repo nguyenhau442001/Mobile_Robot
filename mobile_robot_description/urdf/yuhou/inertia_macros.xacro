@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ====================================================== -->
+  <!-- BOX INERTIA                                            -->
+  <!-- m: mass, x: length, y: width, z: height               -->
+  <!-- ====================================================== -->
+  <xacro:macro name="inertia_box" params="m x y z">
+    <inertial>
+      <mass value="${m}" />
+      <origin xyz="0 0 0" />
+      <inertia
+        ixx="${(1.0/12.0) * m * (y*y + z*z)}"
+        iyy="${(1.0/12.0) * m * (x*x + z*z)}"
+        izz="${(1.0/12.0) * m * (x*x + y*y)}"
+        ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </xacro:macro>
+
+  <!-- ====================================================== -->
+  <!-- CYLINDER INERTIA                                       -->
+  <!-- m: mass, r: radius, h: height (along spin axis)       -->
+  <!-- ====================================================== -->
+  <xacro:macro name="inertia_cylinder" params="m r h">
+    <inertial>
+      <mass value="${m}" />
+      <origin xyz="0 0 0" />
+      <inertia
+        ixx="${(1.0/12.0) * m * (3.0*r*r + h*h)}"
+        iyy="${(1.0/2.0)  * m * r*r}"
+        izz="${(1.0/12.0) * m * (3.0*r*r + h*h)}"
+        ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </xacro:macro>
+
+  <!-- ====================================================== -->
+  <!-- SPHERE INERTIA                                         -->
+  <!-- m: mass, r: radius                                     -->
+  <!-- ====================================================== -->
+  <xacro:macro name="inertia_sphere" params="m r">
+    <inertial>
+      <mass value="${m}" />
+      <origin xyz="0 0 0" />
+      <inertia
+        ixx="${(2.0/5.0) * m * r*r}"
+        iyy="${(2.0/5.0) * m * r*r}"
+        izz="${(2.0/5.0) * m * r*r}"
+        ixy="0" ixz="0" iyz="0" />
+    </inertial>
+  </xacro:macro>
+
+</robot>

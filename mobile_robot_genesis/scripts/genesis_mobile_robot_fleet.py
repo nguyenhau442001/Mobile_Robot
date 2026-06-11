@@ -8,7 +8,7 @@ from xacro_loader import urdf_from_xacro
 
 REPO = Path(__file__).resolve().parents[2]
 ROS_PKG = REPO / "mobile_robot_description"
-XACRO = ROS_PKG / "urdf" / "mobile_robot.urdf.xacro"
+XACRO = ROS_PKG / "urdf" / "rooster" / "rooster.urdf.xacro"
 
 # ── Robot States ────────────────────────────────────────
 

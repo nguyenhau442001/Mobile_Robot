@@ -35,7 +35,7 @@ def generate_launch_description():
     declare_z = DeclareLaunchArgument('z_pos', default_value='0.0')
     declare_headless = DeclareLaunchArgument('headless', default_value='False')
 
-    xacro_file = os.path.join(pkg_description, 'urdf', 'mobile_robot.urdf.xacro')
+    xacro_file = os.path.join(pkg_description, 'urdf', 'rooster', 'rooster.urdf.xacro')
     robot_description = ParameterValue(
         Command(['xacro ', xacro_file]),
         value_type=str

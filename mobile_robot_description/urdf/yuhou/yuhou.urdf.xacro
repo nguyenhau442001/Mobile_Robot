@@ -1,0 +1,201 @@
+<?xml version="1.0"?>
+<robot name="yuhou" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find mobile_robot_description)/urdf/yuhou/inertia_macros.xacro"/>
+  <xacro:include filename="$(find mobile_robot_description)/urdf/yuhou/yuhou.gazebo.xacro"/>
+
+  <!-- robot_dimensions_config.yaml -->
+  <xacro:property name="base_length" value="$(arg base_length)" />
+  <xacro:property name="base_width"  value="$(arg base_width)" />
+  <xacro:property name="base_height" value="$(arg base_height)" />
+  <xacro:property name="base_mass"   value="$(arg base_mass)" />
+
+  <xacro:property name="imu_length" value="$(arg imu_length)" />
+  <xacro:property name="imu_width"  value="$(arg imu_width)" />
+  <xacro:property name="imu_height" value="$(arg imu_height)" />
+  <xacro:property name="imu_mass"   value="$(arg imu_mass)" />
+
+  <xacro:property name="lidar_radius"   value="$(arg lidar_radius)" />
+  <xacro:property name="lidar_length"   value="$(arg lidar_length)" />
+  <xacro:property name="lidar_x_offset" value="$(arg lidar_x_offset)" />
+  <xacro:property name="lidar_mass"     value="$(arg lidar_mass)" />
+
+  <xacro:property name="driven_wheel_radius" value="$(arg driven_wheel_radius)" />
+  <xacro:property name="driven_wheel_length" value="$(arg driven_wheel_length)" />
+  <xacro:property name="driven_wheel_mass"   value="$(arg driven_wheel_mass)" />
+
+  <xacro:property name="caster_wheel_radius"   value="$(arg caster_wheel_radius)" />
+  <xacro:property name="caster_wheel_x_offset" value="$(arg caster_wheel_x_offset)" />
+  <xacro:property name="caster_wheel_mass"     value="$(arg caster_wheel_mass)" />
+
+  <!-- ====================================================== -->
+  <!-- BASE FOOTPRINT                                         -->
+  <!-- Virtual link at ground level (z = 0), directly below  -->
+  <!-- the robot centre. The DiffDrive plugin publishes the   -->
+  <!-- odom→base_footprint TF; base_link sits driven_wheel_  -->
+  <!-- radius above it so wheel bottoms are flush with z = 0 -->
+  <!-- ====================================================== -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${driven_wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ====================================================== -->
+  <!-- BASE LINK                                              -->
+  <!-- ====================================================== -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${base_length} ${base_width} ${base_height}" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${base_length} ${base_width} ${base_height}" />
+      </geometry>
+    </collision>
+    <xacro:inertia_box m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}" />
+  </link>
+
+  <!-- ====================================================== -->
+  <!-- IMU SENSOR                                             -->
+  <!-- ====================================================== -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="${imu_length} ${imu_width} ${imu_height}" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${imu_length} ${imu_width} ${imu_height}" />
+      </geometry>
+    </collision>
+    <xacro:inertia_box m="${imu_mass}" x="${imu_length}" y="${imu_width}" z="${imu_height}" />
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ====================================================== -->
+  <!-- LIDAR SENSOR                                           -->
+  <!-- RPLIDAR A2: 76 mm diameter x 40.7 mm height, 170 g   -->
+  <!-- x = base_length/2 - lidar_radius - lidar_x_offset:   -->
+  <!--   clearance between lidar edge and front of base      -->
+  <!-- z = base_height/2 + lidar_length/2: flush on top      -->
+  <!-- ====================================================== -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${lidar_radius}" length="${lidar_length}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${lidar_radius}" length="${lidar_length}"/>
+      </geometry>
+    </collision>
+    <xacro:inertia_cylinder m="${lidar_mass}" r="${lidar_radius}" h="${lidar_length}" />
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="${base_length/2 - lidar_radius - lidar_x_offset} 0 ${base_height/2 + lidar_length/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ====================================================== -->
+  <!-- WHEEL LINKS                                            -->
+  <!-- rpy="${pi/2} 0 0" rotates the cylinder so its length  -->
+  <!-- axis aligns with Y (the joint spin axis)              -->
+  <!-- ====================================================== -->
+  <link name="left_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${driven_wheel_radius}" length="${driven_wheel_length}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${driven_wheel_radius}" length="${driven_wheel_length}"/>
+      </geometry>
+    </collision>
+    <xacro:inertia_cylinder m="${driven_wheel_mass}" r="${driven_wheel_radius}" h="${driven_wheel_length}" />
+  </link>
+
+  <link name="right_wheel_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${driven_wheel_radius}" length="${driven_wheel_length}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${driven_wheel_radius}" length="${driven_wheel_length}"/>
+      </geometry>
+    </collision>
+    <xacro:inertia_cylinder m="${driven_wheel_mass}" r="${driven_wheel_radius}" h="${driven_wheel_length}" />
+  </link>
+
+  <!-- ====================================================== -->
+  <!-- WHEEL JOINTS                                           -->
+  <!-- Y offset: half base_width + half driven_wheel_length  -->
+  <!-- places each wheel flush against the side of the base  -->
+  <!-- ====================================================== -->
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <origin xyz="0 ${(base_width/2) + (driven_wheel_length/2)} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <origin xyz="0 ${-((base_width/2) + (driven_wheel_length/2))} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- ====================================================== -->
+  <!-- CASTER WHEELS                                          -->
+  <!-- x = ±(base_length/2 - caster_offset)                 -->
+  <!-- z = caster_radius - driven_wheel_radius               -->
+  <!-- ====================================================== -->
+  <xacro:macro name="caster_wheel" params="prefix x_sign">
+    <link name="${prefix}_caster_link">
+      <visual>
+        <geometry>
+          <sphere radius="${caster_wheel_radius}"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <sphere radius="${caster_wheel_radius}"/>
+        </geometry>
+      </collision>
+      <xacro:inertia_sphere m="${caster_wheel_mass}" r="${caster_wheel_radius}" />
+    </link>
+
+    <joint name="${prefix}_caster_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_caster_link"/>
+      <origin xyz="${x_sign * (base_length/2 - caster_wheel_x_offset)} 0 ${caster_wheel_radius - driven_wheel_radius}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:caster_wheel prefix="front" x_sign=" 1"/>
+  <xacro:caster_wheel prefix="back"  x_sign="-1"/>
+
+</robot>
