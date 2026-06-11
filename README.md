@@ -82,3 +82,11 @@ fleet of 100 robots navigating in parallel.
 | Navigation (Nav2 + custom go-to-goal) | [docs/navigation.md](docs/navigation.md) |
 | Simulation (RTF benchmarking + Genesis fleet) | [docs/simulation.md](docs/simulation.md) |
 | Web dashboard | [docs/web-dashboard.md](docs/web-dashboard.md) |
+
+---
+
+## Known macOS limitations
+
+- `gz sim` requires separate server/GUI processes — [upstream issue](https://github.com/gazebosim/gz-sim/issues/44).
+- OGRE-Next (`ogre2`) fails on macOS arm64; uses OGRE 1.x instead.
+- DDS multicast must be restricted to localhost via `GZ_IP` and `ROS_AUTOMATIC_DISCOVERY_RANGE`.
