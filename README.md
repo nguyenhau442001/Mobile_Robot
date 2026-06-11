@@ -77,7 +77,8 @@ fleet of 100 robots navigating in parallel.
 | Topic | Link |
 |---|---|
 | Environment setup | [docs/setup.md](docs/setup.md) |
-| Robot description & kinematics | [docs/robot-description.md](docs/robot-description.md) |
+| Robot description | [docs/robot-description.md](docs/robot-description.md) |
+| Kinematics | [docs/kinematics.md](docs/kinematics.md) |
 | SLAM & Gazebo worlds | [docs/slam.md](docs/slam.md) |
 | Navigation (Nav2 + custom go-to-goal) | [docs/navigation.md](docs/navigation.md) |
 | Simulation (RTF benchmarking + Genesis fleet) | [docs/simulation.md](docs/simulation.md) |
