@@ -39,20 +39,22 @@ fleet of 100 robots navigating in parallel.
 
 ## Packages
 
-- **mobile_robot_description** → Robot geometry and physical description (URDF/xacro). Includes a PyQt5 GUI editor (`robot_dimensions_config_editor`) for live-editing robot dimensions.
-- **mobile_robot_gazebo** → Launch files for spawning the robot in Gazebo (10×10 and AWS small-warehouse worlds) and bridging topics.
-- **mobile_robot_slam** → slam_toolbox bring-up (online async) + RViz for mapping.
-- **mobile_robot_navigation2** → Nav2 bring-up against a saved map (AMCL, DWB controller, NavFn planner).
-- **mobile_robot_custom_nav** → Custom go-to-goal action server/client and RViz goal bridge. Nav2-free alternative — drives the robot to a (x, y, yaw) pose using the cascaded controller.
-- **mobile_robot_interfaces** → Custom ROS 2 interfaces: `GoToGoal.action` (used by `mobile_robot_custom_nav`).
-- **mobile_robot_control** → Interchangeable velocity controllers (Proportional, Cascaded), incremental keyboard teleop node, shared math utilities (`yaw_from_quaternion`, `normalize_angle`, `clamp`), and unit/integration tests.
-- **mobile_robot_multi** → Multi-robot Gazebo + Nav2 bring-up (N robots in one world).
-- **mobile_robot_teleop** → Python nodes for teleoperation (keyboard control, trapezoidal velocity controller).
-- **mobile_robot_monitor** → Real-time velocity monitor: plots cmd_vel setpoint vs odom actual in a rolling 10-second window (PyQtGraph + PyQt5).
-- **mobile_robot_web** → Browser dashboard via rosbridge + roslibjs / ros2djs / ros3djs (map, lidar scan, pose, goal, teleop).
-- **mobile_robot_genesis** → Genesis physics scripts for batched fleet simulation (100+ robots in parallel envs, fleet manager with task assignment).
-- **mobile_robot_mujoco** → Standalone MuJoCo / Gymnasium scratch scripts.
-- **mobile_robot** → Meta-package depending on description, gazebo, navigation2, and teleop.
+| Package | Description |
+|---|---|
+| `mobile_robot_description` | URDF/xacro robot models (Rooster & YuHou). Includes a PyQt5 GUI editor (`robot_dimensions_config_editor`) for live-editing robot dimensions. |
+| `mobile_robot_gazebo` | Launch files for spawning the robot in Gazebo (10×10 and AWS small-warehouse worlds) and bridging topics. |
+| `mobile_robot_slam` | slam_toolbox bring-up (online async) + RViz for mapping. |
+| `mobile_robot_navigation2` | Nav2 bring-up against a saved map (AMCL, DWB controller, NavFn planner). |
+| `mobile_robot_custom_nav` | Custom go-to-goal action server/client and RViz goal bridge. Nav2-free alternative — drives the robot to a (x, y, yaw) pose using the cascaded controller. |
+| `mobile_robot_interfaces` | Custom ROS 2 interfaces: `GoToGoal.action` (used by `mobile_robot_custom_nav`). |
+| `mobile_robot_control` | Interchangeable velocity controllers (Proportional, Cascaded), incremental keyboard teleop node, shared math utilities (`yaw_from_quaternion`, `normalize_angle`, `clamp`), and unit/integration tests. |
+| `mobile_robot_multi` | Multi-robot Gazebo + Nav2 bring-up (N robots in one world). |
+| `mobile_robot_teleop` | Python nodes for teleoperation (keyboard control, trapezoidal velocity controller). |
+| `mobile_robot_monitor` | Real-time velocity monitor: plots cmd_vel setpoint vs odom actual in a rolling 10-second window (PyQtGraph + PyQt5). |
+| `mobile_robot_web` | Browser dashboard via rosbridge + roslibjs / ros2djs / ros3djs (map, lidar scan, pose, goal, teleop). |
+| `mobile_robot_genesis` | Genesis physics scripts for batched fleet simulation (100+ robots in parallel envs, fleet manager with task assignment). |
+| `mobile_robot_mujoco` | Standalone MuJoCo / Gymnasium scratch scripts. |
+| `mobile_robot` | Meta-package depending on description, gazebo, navigation2, and teleop. |
 
 ## Highlights
 
