@@ -11,7 +11,7 @@ from xacro_loader import urdf_from_xacro
 
 REPO = Path(__file__).resolve().parents[2]
 ROS_PKG = REPO / "mobile_robot_description"
-XACRO = ROS_PKG / "urdf" / "rooster" / "rooster.urdf.xacro"
+XACRO = ROS_PKG / "models" / "rooster" / "urdf" / "rooster.urdf.xacro"
 
 N_ENVS = 100
 GRID_COLS = 10                  # 10 × 10 grid

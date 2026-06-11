@@ -2,8 +2,8 @@
 <robot name="rooster" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ================== Includes ================== -->
-  <xacro:include filename="$(find mobile_robot_description)/urdf/rooster/rooster.gazebo.xacro" />
-  <xacro:include filename="$(find mobile_robot_description)/urdf/rooster/materials.xacro" />
+  <xacro:include filename="$(find mobile_robot_description)/models/rooster/urdf/rooster.gazebo.xacro" />
+  <xacro:include filename="$(find mobile_robot_description)/models/rooster/urdf/materials.xacro" />
 
   <!-- 
     Robot Structure Overview:
@@ -29,7 +29,7 @@
     <!-- Chassis Visual -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/rooster/chassis_link.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/models/rooster/meshes/chassis_link.stl"/></geometry>
       <material name="orange"></material>
     </visual>
 
@@ -103,7 +103,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/rooster/wheel_link.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/models/rooster/meshes/wheel_link.stl"/></geometry>
       <material name="black"></material>
     </visual>
     <!-- Cylinder collision along Y (axle), see scripts/inspect_mesh.py -->
@@ -134,7 +134,7 @@
     <visual>
       <!-- Flip mesh along Y so the wheel sits inboard (mesh is modeled with Y in [-0.041, 0]) -->
       <origin xyz="0 0 0" rpy="${pi} 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/rooster/wheel_link.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/models/rooster/meshes/wheel_link.stl"/></geometry>
       <material name="black"></material>
     </visual>
     <!-- Cylinder collision along Y (axle), see scripts/inspect_mesh.py -->
@@ -176,7 +176,7 @@
     </inertial>
     <visual>
       <origin xyz="0 0 0"/>
-      <geometry><mesh filename="file://$(find mobile_robot_description)/meshes/rooster/lidar_link.stl"/></geometry>
+      <geometry><mesh filename="file://$(find mobile_robot_description)/models/rooster/meshes/lidar_link.stl"/></geometry>
       <material name="white"></material>
     </visual>
     <!-- Cylinder collision along Z, see scripts/inspect_mesh.py -->

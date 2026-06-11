@@ -186,7 +186,7 @@ def generate_launch_description():
 
     default_robots_file = os.path.join(pkg_multi, 'config', 'robots.yaml')
     default_world = os.path.join(pkg_gazebo, 'worlds', '10x10', '10x10.sdf')
-    xacro_file = os.path.join(pkg_description, 'urdf', 'rooster', 'rooster.urdf.xacro')
+    xacro_file = os.path.join(pkg_description, 'models', 'rooster', 'urdf', 'rooster.urdf.xacro')
 
     # Resolve robot list at parse time so we can loop in Python. If N_ROBOTS is
     # set, auto-arrange that many on a grid; otherwise read from robots.yaml
