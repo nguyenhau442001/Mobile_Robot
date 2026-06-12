@@ -7,6 +7,7 @@
 ![Stars](https://img.shields.io/github/stars/nguyenhau442001/Differential_Drive_Mobile_Robot?style=flat-square)
 ![Last Commit](https://img.shields.io/github/last-commit/nguyenhau442001/Differential_Drive_Mobile_Robot?style=flat-square)
 
+<img width="3018" height="1892" alt="image" src="https://github.com/user-attachments/assets/fd8911b9-ba57-4429-86a3-b67e4e172fff" />
 
 **Supported platforms:** Ubuntu 24.04 · macOS 26.5 Tahoe
 
