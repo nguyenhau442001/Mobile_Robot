@@ -55,3 +55,7 @@ differential_drive_mobile_robot.egg-info/PKG-INFO
 differential_drive_mobile_robot.egg-info/requires.txt
 differential_drive_mobile_robot.egg-info/SOURCES.txt
 differential_drive_mobile_robot.egg-info/top_level.txt
+
+# OS generated files
+.DS_Store
+
