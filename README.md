@@ -92,3 +92,55 @@ fleet of 100 robots navigating in parallel.
 - `gz sim` requires separate server/GUI processes — [upstream issue](https://github.com/gazebosim/gz-sim/issues/44).
 - OGRE-Next (`ogre2`) fails on macOS arm64; uses OGRE 1.x instead.
 - DDS multicast must be restricted to localhost via `GZ_IP` and `ROS_AUTOMATIC_DISCOVERY_RANGE`.
+
+---
+
+# 🛠️ Advanced Autonomous Mobile Robot Platform - Development Roadmap
+
+This roadmap outlines the systematic upgrade of the `Mobile_Robot` repository to bridge the gap toward **Embedded AI Robotics** and **Heterogeneous System Architectures** (targeting modern SoCs like Renesas R-Car/RZ series).
+
+---
+
+## 📌 Phase 1: AI Perception & Vision Pipeline (`robot_ai_perception`)
+*Objective: Integrate real-time deep learning inference into the ROS2 framework using software simulation.*
+
+- [ ] **1.1. ROS2 Camera Integration Package**
+  - Create a dedicated ROS2 package `robot_ai_perception` inside the workspace.
+  - Implement a subscriber node to capture raw image streams and depth data published by the Gazebo (Gz-Sim) RGB-D camera sensor.
+- [ ] **1.2. Deep Learning Model Integration (ONNX Runtime / TensorRT)**
+  - Integrate a lightweight object detection model (e.g., YOLOv8-nano or MobileNet SSD) optimized for edge deployment.
+  - Setup pre-processing and post-processing pipelines in C++/Python to handle inference on simulated frames.
+- [ ] **1.3. ROS2 Custom Perception Topic Publishing**
+  - Publish processed bounding boxes, object classes, and relative 3D coordinates to `/perception/detected_objects`.
+  - Ensure message synchronization using `message_filters` to align sensor data with robot state.
+
+---
+
+## 📌 Phase 2: Simulation & Advanced Navigation Stack (`Nav2 & Gz-Sim`)
+*Objective: Validate autonomous navigation and sensor fusion algorithms in a complex virtual environment.*
+
+- [ ] **2.1. Virtual Warehouse Environment Modeling**
+  - Design and construct a complex indoor map (warehouse/office layout) within Gazebo (Gz-Sim).
+  - Configure walls, obstacles, and dynamic elements to test edge-case navigation scenarios.
+- [ ] **2.2. Robust Sensor Fusion & Localization**
+  - Integrate LiDAR (`/scan`), IMU (`/imu`), and wheel encoder data.
+  - Tune the Extended Kalman Filter (EKF) via Robot Localization package to produce a drift-free `/odom` topic.
+- [ ] **2.3. Navigation2 (Nav2) Stack Tuning**
+  - Setup Global Planner and Local Planner parameters (e.g., TEB Local Planner or DWB Controller) for smooth trajectory generation.
+  - Implement obstacle avoidance behavior reacting directly to inputs from the AI perception pipeline.
+- [ ] **2.4. Simulation Automation Scripts**
+  - Write Bash/Python automation scripts to launch multi-node testing environments automatically, enabling repeatable regression testing for path planning.
+
+---
+
+## 📌 Phase 3: Heterogeneous Architecture & Low-Level Middleware Simulation (`/architecture_sim`)
+*Objective: Simulate multi-core task offloading and low-latency inter-process communication (IPC) inspired by heterogeneous SoCs (Cortex-A / Cortex-R / Cortex-M).*
+
+- [ ] **3.1. Multithreading Task Allocation Framework**
+  - Build a C++ module simulating asymmetric multi-processing (AMP) behavior:
+    - **High-Performance Core simulation (Cortex-A style):** Handling heavy tasks like path planning, mapping, and AI inference logic.
+    - **Real-Time Core simulation (Cortex-R/M style):** Handling high-frequency sensor polling, motor control loops, and safety watchdog interrupts.
+- [ ] **3.2. Low-Latency Inter-Process Communication (IPC)**
+  - Implement Shared Memory (`shm`) and Lock-free Message Queues to minimize communication latency between the simulated high-performance and real-time tiers.
+  - Benchmark message passing overhead under various load conditions to demonstrate real-time readiness.
+
